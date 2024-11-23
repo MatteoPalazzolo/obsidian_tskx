@@ -6,3 +6,28 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+
+:root {
+    --color-danger: #fb464c;
+}
+
+.text-input-class {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.banner-image-selection {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.git-modal-button-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+.git-modal-button-container > .commit {
+    background-color: var(--color-danger);
+}
+.git-modal-button-container > .close {
+}
