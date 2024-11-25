@@ -91,13 +91,17 @@ export async function fetchTMDbBanner(name: string): Promise<string[]> {
 
     const jsonData: any = await requestGetJson(url, params, headers);
     
+    if (!Object.keys(jsonData).length) {
+        return [];
+    }
+    
     const imgUrls: string[] = []
     jsonData.results.forEach((el: any) => {
         if (el.backdrop_path)
             imgUrls.push("https://image.tmdb.org/t/p/w600_and_h900_bestv2" + el.backdrop_path)
         if (el.poster_path)
             imgUrls.push("https://image.tmdb.org/t/p/w600_and_h900_bestv2" + el.poster_path)
-    });;
+    });
 
     return imgUrls;
 }
