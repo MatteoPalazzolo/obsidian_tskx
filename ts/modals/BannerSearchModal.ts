@@ -1,7 +1,7 @@
 import { App, Modal, Notice } from 'obsidian';
-import { fetchSteamBanner } from '../utils/FetchBanner';
+import { fetchSteamBanner, fetchItchioBanner, fetchTMDbBanner } from '../utils/FetchBanner';
 
-export class SearchThisGameModal extends Modal {
+export class BannerSearchModal extends Modal {
 	constructor(app: App) {
 		super(app);
 	}
@@ -14,10 +14,18 @@ export class SearchThisGameModal extends Modal {
         const val = this.app.workspace.getActiveFile()?.basename;
         if (val === undefined) {
             new Notice(`Target file not detected.`);
+            return
         }
 
-        const bannerImgUrlList = await fetchSteamBanner(val as string);
-        bannerImgUrlList.slice(0,6).forEach(url => {
+        const steamBannerList = await fetchSteamBanner(val);
+        const itchioBannerList = await fetchItchioBanner(val);
+        const TMDbBannerList = await fetchTMDbBanner(val);
+        const bannerList = [
+            ...steamBannerList.slice(0,5),
+            ...itchioBannerList.slice(0,5),
+            ...TMDbBannerList.slice(0,5)
+        ];
+        bannerList.forEach(url => {
             const img = contentEl.createEl('img', { attr: { src: url }, cls :"banner-image-selection click" });
             // onclick: copy to clipboard
             img.addEventListener("click", function(evt: MouseEvent) {

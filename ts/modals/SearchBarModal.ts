@@ -1,5 +1,5 @@
 import { App, Modal, Notice } from 'obsidian';
-import { fetchGameBanner } from '../utils/FetchGameBanner';
+import { fetchSteamBanner } from '../utils/FetchBanner';
 
 export class SearchBarModal extends Modal {
 	constructor(app: App) {
@@ -20,7 +20,7 @@ export class SearchBarModal extends Modal {
         input.addEventListener('keydown', async event => {
             if (event.key === "Enter" && input.value.trim() !== "") {
                 new Notice(`You entered: ${input.value}`);
-                const bannerImgUrlList = await fetchGameBanner(input.value);
+                const bannerImgUrlList = await fetchSteamBanner(input.value);
                 div.empty()
                 bannerImgUrlList.slice(0,6).forEach(url => {
                     div.createEl('img', { attr: { src: url }, cls: "banner-image-selection" });

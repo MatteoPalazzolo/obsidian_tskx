@@ -25,9 +25,25 @@ If your plugin does not need CSS, delete this file.
     display: flex;
     justify-content: space-around;
     align-items: center;
+    
+    & > .commit {
+        background-color: var(--color-danger);
+    }
+    
+    & > .close {
+    }
 }
-.git-modal-button-container > .commit {
-    background-color: var(--color-danger);
-}
-.git-modal-button-container > .close {
+
+img.click {
+    border: 2px #0000 solid;
+    border-radius: 5px;
+
+    &:hover {
+        opacity: .8;
+        border: 2px red solid;
+    }
+    &:active {
+        opacity: 1;
+        border: 2px green solid;
+    }
 }

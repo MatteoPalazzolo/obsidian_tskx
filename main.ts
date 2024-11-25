@@ -1,6 +1,7 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import { SearchBarModal } from 'ts/modals/SearchBarModal';
 import { SearchThisGameModal } from 'ts/modals/SearchThisGameModal';
+import { BannerSearchModal } from 'ts/modals/BannerSearchModal';
 import { GitPushModal } from 'ts/modals/GitPushModal';
 
 
@@ -10,6 +11,7 @@ export default class extends Plugin {
         // https://lucide.dev/
         this.addRibbonIcon('image', 'Image Tool', (evt: MouseEvent) => new SearchBarModal(this.app).open() );
         this.addRibbonIcon('image', 'This Game Banner', (evt: MouseEvent) => new SearchThisGameModal(this.app).open() );
+        this.addRibbonIcon('image-plus', 'Search Banner', (evt: MouseEvent) => new BannerSearchModal(this.app).open() );
         this.addRibbonIcon('github', 'Git Push', (evt: MouseEvent) => new GitPushModal(this.app).open() );
         
     }
