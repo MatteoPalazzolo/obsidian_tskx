@@ -8,30 +8,49 @@ If your plugin does not need CSS, delete this file.
 */
 
 .BannerSearchModal {
-    & .text-input-class {
+
+    & .input-container {
         width: 100%;
-        margin-bottom: 10px;
+        display: flex;
+        gap: 5px;
+        justify-content: space-around;
+
+        & input {
+            flex: 10;
+        }
+        & select {
+            flex: 5;
+        }
+        & span {
+            flex: 1;
+        }        
     }
-    
-    & .banner-image-selection {
+
+    & hr {
+        margin-top: 18px;
+        margin-bottom: 16px;
+    }
+
+    & .images-container {
         width: 100%;
-        margin-bottom: 10px;
-    }
-
-    & img.click {
-        border: 2px #0000 solid;
-        border-radius: 5px;
+        
+        & img.click {
+            width: 100%;
+            margin-bottom: 4px;
+            border: 2px var(--hr-color) solid;
+            border-radius: 5px;
+        
+            &:hover {
+                opacity: .8;
+                border: 2px red solid;
+            }
     
-        &:hover {
-            opacity: .8;
-            border: 2px red solid;
+            &:active {
+                opacity: 1;
+                border: 2px green solid;
+            }
+    
         }
-
-        &:active {
-            opacity: 1;
-            border: 2px green solid;
-        }
-
     }
 
 }
@@ -48,7 +67,7 @@ If your plugin does not need CSS, delete this file.
 }
 
 .GitPushModal {
-    & .git-modal-button-container {
+    & .button-container {
         display: flex;
         justify-content: space-around;
         align-items: center;

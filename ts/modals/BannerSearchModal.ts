@@ -1,9 +1,41 @@
-import { App, Modal, Notice } from 'obsidian';
-import { fetchSteamBanner, fetchItchioBanner, fetchTMDbBanner } from '../utils/FetchBanner';
+import { App, Modal, Notice, TFile, setIcon } from 'obsidian';
+import { 
+    fetchSteamBanner, 
+    fetchItchioBanner, 
+    fetchTMDbBanner 
+} from '../utils/FetchBanner';
 
 export class BannerSearchModal extends Modal {
     constructor(app: App) {
         super(app);
+    }
+
+    MEDIA_REGEX = /(?<=Analysis\/)[^/]+(?=\/)/;
+    MEDIA_TO_SCRAPER: {[key:string] : ((name: string) => Promise<string[]>)[] } = {
+        All: [
+            fetchSteamBanner,
+            fetchItchioBanner,
+            fetchTMDbBanner
+        ],
+        Videogiochi: [
+            fetchSteamBanner,
+            fetchItchioBanner
+        ],
+        Film: [
+            fetchTMDbBanner
+        ],
+        "Serie TV": [
+            fetchTMDbBanner
+        ],
+        Anime: [
+            fetchTMDbBanner
+        ],
+        Libri: [
+
+        ],
+        TTRPG: [
+
+        ]
     }
 
     async onOpen() {
@@ -11,30 +43,50 @@ export class BannerSearchModal extends Modal {
         contentEl.addClass("BannerSearchModal");
         contentEl.createEl('h3', { text: 'Banner Search' });
 
-        const inputEl = contentEl.createEl('input', { type: 'text', cls: 'text-input-class' });
-        inputEl.placeholder = "game to search for...";
+        const searchBarDivEl =  contentEl.createDiv({ cls: 'input-container' });
 
-        const imgContainerEl = contentEl.createDiv();
+        const inputEl = searchBarDivEl.createEl('input', {
+            type: 'text', cls: 'text-input-class', placeholder: 'game to search for...' 
+        });
+       
+        const selectEl = searchBarDivEl.createEl('select', { type: 'text', cls: 'dropdown' });
+        
+        const searchButtonEl = searchBarDivEl.createSpan({ cls: 'clickable-icon' });
+        setIcon(searchButtonEl, 'search');
 
-        const name = this.app.workspace.getActiveFile()?.basename;
+        contentEl.createEl("hr");
+
+        const imgContainerEl = contentEl.createDiv({ cls: 'images-container' });
+
+        // search on open
+        const { name, mediaType } = this.getCurrentFileInfo();
+
         if (name) {
             inputEl.value = name;
-            this.loadBanner(imgContainerEl, name);
         } else {
-            new Notice(`Target file not detected.`);
+            new Notice(`Target filename not detected.`);
         }
 
-        inputEl.addEventListener('keydown', async event => {
-            if (event.key === "Enter") {
-                imgContainerEl.empty();
-                if (inputEl.value.trim() !== "") {
-                    new Notice(`You entered: ${inputEl.value.trim()}`);
-                    this.loadBanner(imgContainerEl, inputEl.value);
-                }
+        this.getMediaTypeList().forEach( mt => selectEl.createEl("option", { text: mt }) );
+        if (mediaType) {
+            selectEl.value = mediaType;
+        } else {
+            new Notice(`Target media type not detected.`);
+        }
+
+        this.searchAndLoadBanner(imgContainerEl, name, mediaType);
+
+        // search on keydown
+        inputEl.addEventListener('keydown', evt => {
+            if (evt.key === "Enter") {
+                this.searchAndLoadBanner(imgContainerEl, inputEl.value, selectEl.value);
             }
         });
-
-
+        
+        // search on button click
+        searchButtonEl.addEventListener('click', (evt: MouseEvent) => 
+            this.searchAndLoadBanner(imgContainerEl, inputEl.value, selectEl.value)
+        );
 
     }
 
@@ -43,17 +95,35 @@ export class BannerSearchModal extends Modal {
         contentEl.empty();
     }
 
-    private async loadBanner(parent: HTMLElement, name: string): Promise<void> {
-        const steamBannerList = await fetchSteamBanner(name);
-        const itchioBannerList = await fetchItchioBanner(name);
-        const TMDbBannerList = await fetchTMDbBanner(name);
-        const bannerList = [
-            ...steamBannerList.slice(0, 5),
-            ...itchioBannerList.slice(0, 5),
-            ...TMDbBannerList.slice(0, 5)
-        ];
+    private getMediaTypeList() : string[] {
+        const mediaTypeList: string[] = [];
+        this.app.vault.getFiles().forEach((file: TFile) => {
+            const match = file.path.match(this.MEDIA_REGEX);
+            if (match && !mediaTypeList.includes(match[0])) {
+                mediaTypeList.push(match[0])
+            }
+
+        });
+        return ["All", ...mediaTypeList];
+    }
+
+    private async searchAndLoadBanner(parent: HTMLElement, name: string | undefined, mediaType: string | undefined) {
+
+        parent.empty();
+
+        if (!name || name.trim() === "" || !mediaType) {
+            new Notice("Invalid input.");
+            return
+        }
+
+        const bannerList = [];
+        for (const func of this.MEDIA_TO_SCRAPER[mediaType]) {
+            const links = await func(name);
+            bannerList.push(...links.slice(0,5));
+        }
+
         bannerList.forEach(url => {
-            const img = parent.createEl('img', { attr: { src: url }, cls: "banner-image-selection click" });
+            const img = parent.createEl('img', { attr: { src: url }, cls: "click" });
             // onclick: copy to clipboard
             img.addEventListener("click", function (evt: MouseEvent) {
                 const imgSrc = this.src;
@@ -67,4 +137,28 @@ export class BannerSearchModal extends Modal {
             });
         });
     }
+
+    private getCurrentFileInfo() : { name: string | undefined, mediaType: string | undefined } {
+        const currentFile = this.app.workspace.getActiveFile();
+        
+        if (!currentFile) {
+            return {
+                name: undefined,
+                mediaType: undefined
+            };
+        }
+
+        let mediaType = undefined;
+
+        const match = currentFile.path.match(this.MEDIA_REGEX);
+        if (match) {
+            mediaType = match[0];
+        }
+
+        return {
+            name: currentFile.basename,
+            mediaType
+        };
+    }
+
 }

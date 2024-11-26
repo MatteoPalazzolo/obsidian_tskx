@@ -5,6 +5,18 @@ export class DefaultScannerModal extends Modal {
         super(app);
     }
 
+    ANALYSIS_PATH = "Analysis/";
+    DEFAULT_IMAGE = "![header](replace.jpg)";
+    PATHS: {[key: string]: string} = {
+        Anime: "Analysis/Anime/",
+        Film: "Analysis/Film/",
+        Books: "Analysis/Books/",
+        Podcast: "Analysis/Podcast/",
+        "TV Series": "Analysis/Serie TV/",
+        TTRPG: "Analysis/TTRPG/",
+        Videogames: "Analysis/Videogiochi/",
+    };
+
     async onOpen() {
         const { contentEl } = this;
         contentEl.addClass("DefaultScannerModal");
@@ -29,14 +41,12 @@ export class DefaultScannerModal extends Modal {
     }
 
     private async getDefaultImageFiles(): Promise<TFile[]> {
-        const ANALYSIS_PATH = "Analysis/";
-        const DEFAULT_IMAGE = "![header](replace.jpg)";
-        const files = this.app.vault.getFiles().filter((file: TFile) => file.path.startsWith(ANALYSIS_PATH));
+        const files = this.app.vault.getFiles().filter((file: TFile) => file.path.startsWith(this.ANALYSIS_PATH));
 
         const filteredFiles = [];
         for (const file of files) {
             const content = await this.app.vault.read(file);
-            if (content.includes(DEFAULT_IMAGE)) {
+            if (content.includes(this.DEFAULT_IMAGE)) {
                 filteredFiles.push(file);
             }
         }
@@ -45,19 +55,9 @@ export class DefaultScannerModal extends Modal {
     }
 
     private orderFilesInDict(files: TFile[]) : {[key: string]: string[]} {
-        const PATHS: {[key: string]: string} = {
-            Anime: "Analysis/Anime/",
-            Film: "Analysis/Film/",
-            Books: "Analysis/Books/",
-            Podcast: "Analysis/Podcast/",
-            "TV Series": "Analysis/Serie TV/",
-            TTRPG: "Analysis/TTRPG/",
-            Videogames: "Analysis/Videogiochi/",
-        }
-
         const outDict: {[key: string]: string[]} = {};
-        for (const k of Object.keys(PATHS)) {
-            const tmp = files.filter((file: TFile) => file.path.startsWith(PATHS[k]));
+        for (const k of Object.keys(this.PATHS)) {
+            const tmp = files.filter((file: TFile) => file.path.startsWith(this.PATHS[k]));
             outDict[k] = tmp.map((file: TFile) => file.basename);
         }
 
@@ -67,10 +67,8 @@ export class DefaultScannerModal extends Modal {
     private createInternalLink(parent: HTMLElement, name: string): HTMLElement {
 
         const internalLink = parent.createEl("li").createEl("a", {
-            text: name,
+            text: name, cls: "internal-link"
         });
-
-        internalLink.addClass("internal-link");
 
         internalLink.addEventListener("click", (event: MouseEvent) => {
             event.preventDefault();

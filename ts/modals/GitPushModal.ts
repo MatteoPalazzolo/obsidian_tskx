@@ -15,7 +15,7 @@ export class GitPushModal extends Modal {
         contentEl.createEl('p', { text: "Do you wanna commit the work done so far?" });
 
         // Buttons container
-        const buttonsDiv = contentEl.createDiv({ cls: 'git-modal-button-container' });
+        const buttonsDiv = contentEl.createDiv({ cls: 'button-container' });
 
         // Accept Button
         const acceptButton = buttonsDiv.createEl('button', { text: 'Sure Af Dude', cls: 'mod-warning' });
