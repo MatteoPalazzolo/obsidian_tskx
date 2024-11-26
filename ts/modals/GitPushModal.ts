@@ -8,7 +8,7 @@ export class GitPushModal extends Modal {
 
 	onOpen() {
 		const {contentEl} = this;
-        
+        contentEl.addClass("GitPushModal");
         contentEl.createEl('h3', { text: "Git Push" });
 
         // Message
@@ -18,7 +18,7 @@ export class GitPushModal extends Modal {
         const buttonsDiv = contentEl.createDiv({ cls: 'git-modal-button-container' });
 
         // Accept Button
-        const acceptButton = buttonsDiv.createEl('button', { text: 'Sure Af Dude', cls: 'commit' });
+        const acceptButton = buttonsDiv.createEl('button', { text: 'Sure Af Dude', cls: 'mod-warning' });
         acceptButton.addEventListener('click', async () => {
             const success = await gitPush(); 
             if (success) {
@@ -30,7 +30,7 @@ export class GitPushModal extends Modal {
         });
 
         // Deny Button
-        const denyButton = buttonsDiv.createEl('button', { text: 'Nevermind', cls: 'close' });
+        const denyButton = buttonsDiv.createEl('button', { text: 'Nevermind', cls: 'mod-cancel' });
         denyButton.addEventListener('click', () => {
             this.close();
         });

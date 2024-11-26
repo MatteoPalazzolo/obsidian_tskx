@@ -7,14 +7,14 @@ export class DefaultScannerModal extends Modal {
 
     async onOpen() {
         const { contentEl } = this;
-        contentEl.setText("Scanner");
-        contentEl.addClass("MissingBannerModal");
-        
+        contentEl.addClass("DefaultScannerModal");
+        contentEl.createEl('h3', { text: 'Default Image Scanner' });
+                
         const selectedFiles = await this.getDefaultImageFiles();
         const mediaNames = this.orderFilesInDict(selectedFiles);
 
         for (const k of Object.keys(mediaNames)) {
-            contentEl.createEl('h3', { text: k });
+            contentEl.createEl('h4', { text: k, cls: 'section-header' });
             const ul = contentEl.createEl("ul");
             for (const name of mediaNames[k]) {
                 this.createInternalLink(ul, name);

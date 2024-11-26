@@ -7,52 +7,52 @@ If your plugin does not need CSS, delete this file.
 
 */
 
-:root {
-    --color-danger: #fb464c;
-}
-
-.text-input-class {
-    width: 100%;
-    margin-bottom: 10px;
-}
-
-.banner-image-selection {
-    width: 100%;
-    margin-bottom: 10px;
-}
-
-.git-modal-button-container {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    
-    & > .commit {
-        background-color: var(--color-danger);
+.BannerSearchModal {
+    & .text-input-class {
+        width: 100%;
+        margin-bottom: 10px;
     }
     
-    & > .close {
+    & .banner-image-selection {
+        width: 100%;
+        margin-bottom: 10px;
     }
+
+    & img.click {
+        border: 2px #0000 solid;
+        border-radius: 5px;
+    
+        &:hover {
+            opacity: .8;
+            border: 2px red solid;
+        }
+
+        &:active {
+            opacity: 1;
+            border: 2px green solid;
+        }
+
+    }
+
 }
 
-img.click {
-    border: 2px #0000 solid;
-    border-radius: 5px;
-
-    &:hover {
-        opacity: .8;
-        border: 2px red solid;
-    }
-    &:active {
-        opacity: 1;
-        border: 2px green solid;
-    }
-}
-
-.MissingBannerModal {
-    & h3 {
+.DefaultScannerModal {
+    & .section-header {
         margin-bottom: 5px;
     }
+
     & ul {
         margin-top: 5px;
     }
+
+}
+
+.GitPushModal {
+    & .git-modal-button-container {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        
+    }
+
 }
