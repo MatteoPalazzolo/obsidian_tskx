@@ -14,6 +14,7 @@ If your plugin does not need CSS, delete this file.
         display: flex;
         gap: 5px;
         justify-content: space-around;
+        margin-bottom: 10px;
 
         & input {
             flex: 10;
@@ -26,8 +27,15 @@ If your plugin does not need CSS, delete this file.
         }        
     }
 
+    & .my-checkbox-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+    }
+
     & hr {
-        margin-top: 18px;
+        margin-top: 10px;
         margin-bottom: 16px;
     }
 

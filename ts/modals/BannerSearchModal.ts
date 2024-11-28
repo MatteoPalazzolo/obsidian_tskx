@@ -10,6 +10,7 @@ export class BannerSearchModal extends Modal {
         super(app);
     }
 
+    HEADER_REGEX = /!\[header\]\((.*?)\)/;
     MEDIA_REGEX = /(?<=Analysis\/)[^/]+(?=\/)/;
     MEDIA_TO_SCRAPER: {[key:string] : ((name: string) => Promise<string[]>)[] } = {
         All: [
@@ -38,6 +39,8 @@ export class BannerSearchModal extends Modal {
         ]
     }
 
+    checkboxEl: HTMLInputElement;
+
     async onOpen() {
         const { contentEl } = this;
         contentEl.addClass("BannerSearchModal");
@@ -53,6 +56,10 @@ export class BannerSearchModal extends Modal {
         
         const searchButtonEl = searchBarDivEl.createSpan({ cls: 'clickable-icon' });
         setIcon(searchButtonEl, 'search');
+
+        const checkboxDiv = contentEl.createDiv({ cls: 'my-checkbox-container' });
+        checkboxDiv.createEl('label', { cls: 'mod-checkbox', text: "replace current header image" });
+        this.checkboxEl = checkboxDiv.createEl('input', { type: 'checkbox' });
 
         contentEl.createEl("hr");
 
@@ -125,16 +132,46 @@ export class BannerSearchModal extends Modal {
         bannerList.forEach(url => {
             const img = parent.createEl('img', { attr: { src: url }, cls: "click" });
             // onclick: copy to clipboard
-            img.addEventListener("click", function (evt: MouseEvent) {
-                const imgSrc = this.src;
-                navigator.clipboard.writeText(imgSrc).then(() => {
-                    new Notice('Link copiato nella clipboard!');
-                    console.log('Link copiato nella clipboard!');
-                }).catch(err => {
-                    new Notice('Errore nel copiare il testo:', err);
-                    console.log('Errore nel copiare il testo:', err);
-                });
+            img.addEventListener("click", (evt: MouseEvent) => {
+                const imgSrc = (evt.currentTarget as HTMLImageElement).src;
+                if (this.checkboxEl.checked) {
+                    this.replaceBannerImage(imgSrc);
+                } else {
+                    this.copyToClipboard(imgSrc);
+                }
+                
             });
+        });
+    }
+
+    private async replaceBannerImage(imgSrc: string) {
+        const activeFile = this.app.workspace.getActiveFile();
+        if (!activeFile) {
+            new Notice("No active file found.");
+            return;
+        }
+
+        const fileContent = await this.app.vault.read(activeFile);
+        
+        const match = this.HEADER_REGEX.exec(fileContent);
+        if (!match) {
+            new Notice("No header image link found.");
+            return;
+        }
+
+        const oldLink = match[1];
+        const updatedContent = fileContent.replace(oldLink, imgSrc);
+
+        await this.app.vault.modify(activeFile, updatedContent);
+    }
+
+    private copyToClipboard(imgSrc: string) {
+        navigator.clipboard.writeText(imgSrc).then(() => {
+            new Notice('Link copiato nella clipboard!');
+            console.log('Link copiato nella clipboard!');
+        }).catch(err => {
+            new Notice('Errore nel copiare il testo:', err);
+            console.log('Errore nel copiare il testo:', err);
         });
     }
 
