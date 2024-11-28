@@ -3,9 +3,9 @@
 	"name": "My Dude",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Please Open a Modal.",
-	"author": "Me",
+	"description": "Some utilities to speed up boring tasks.",
+	"author": "Palazz",
 	"authorUrl": "https://obsidian.md",
 	"fundingUrl": "https://obsidian.md/pricing",
-	"isDesktopOnly": true
+	"isDesktopOnly": false
 }

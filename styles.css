@@ -9,6 +9,10 @@ If your plugin does not need CSS, delete this file.
 
 .BannerSearchModal {
 
+    .modal:has(&) {
+        width: 80%;
+    }
+
     & .input-container {
         width: 100%;
         display: flex;
@@ -41,6 +45,13 @@ If your plugin does not need CSS, delete this file.
 
     & .images-container {
         width: 100%;
+        display: flex;
+        flex-flow: column;
+        align-items: center;
+
+        & .no-img-found {
+
+        }
         
         & img.click {
             width: 100%;

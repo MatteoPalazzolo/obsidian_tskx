@@ -36,6 +36,9 @@ export class BannerSearchModal extends Modal {
         ],
         TTRPG: [
 
+        ],
+        Podcast: [
+
         ]
     }
 
@@ -126,7 +129,12 @@ export class BannerSearchModal extends Modal {
         const bannerList = [];
         for (const func of this.MEDIA_TO_SCRAPER[mediaType] ?? this.MEDIA_TO_SCRAPER["All"]) {
             const links = await func(name);
-            bannerList.push(...links.slice(0,5));
+            bannerList.push(...links.slice(0,/*5*/undefined));
+        }
+
+        if (bannerList.length === 0) {
+            parent.createSpan({ text: "no image found", cls: 'no-img-found' });
+            return;
         }
 
         bannerList.forEach(url => {

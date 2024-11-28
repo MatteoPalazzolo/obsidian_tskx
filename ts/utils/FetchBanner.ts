@@ -1,5 +1,6 @@
 import { requestGetText, requestGetJson } from './RequestGet';
 
+
 export async function fetchSteamBanner(name: string): Promise<string[]> {
 
     // STEP 1 : richiesta alla funzione di search
@@ -47,61 +48,26 @@ export async function fetchItchioBanner(name: string): Promise<string[]> {
 
 }
 
-
-
-/*
-// npm i imdb-scraper
-import IMDBScraper from 'imdb-scraper';
-
-export async function fetchOMDbBanner(name:string): Promise<string[]> {
-   
-    const url = "http://www.omdbapi.com/?"
-    const params = {
-        apikey: "",
-        t: name
-    }
-
-    const res = await requestGet(url, params);
-    if (!res)
-        return [];
-    const ans = res.json;
-    
-    console.log(ans)
-
-    const Imdb = new IMDBScraper()
-    Imdb.title(ans.imdbID)
-    .then(res => console.log(res))
-    .catch(err => console.log(err))
-
-    return [];
-}*/
-
 export async function fetchTMDbBanner(name: string): Promise<string[]> {
-
-    const url = "https://api.themoviedb.org/3/search/movie?"
+    const url = "https://www.themoviedb.org"
     const params = {
-        query: name,
-        include_adult: true,
-        language: "en-US",
-        page: 1
-    }
-    const headers = {
-        accept: 'application/json',
+        query: name
     }
 
-    const jsonData: any = await requestGetJson(url, params, headers);
+    const linkHtml = await requestGetText(url + "/search?", params);
+    const linkRegex = /class="poster"[\s\S]*?href="(.+?)"/g;
     
-    if (!Object.keys(jsonData).length) {
-        return [];
-    }
+    const mediaLinks = [...linkHtml.matchAll(linkRegex)].map( match => url + match[1] + "/images/backdrops" ).slice(0,5);
     
-    const imgUrls: string[] = []
-    jsonData.results.forEach((el: any) => {
-        if (el.backdrop_path)
-            imgUrls.push("https://image.tmdb.org/t/p/w600_and_h900_bestv2" + el.backdrop_path)
-        if (el.poster_path)
-            imgUrls.push("https://image.tmdb.org/t/p/w600_and_h900_bestv2" + el.poster_path)
-    });
+    // const imagesRegex = /class="card compact ok"[\s\S]*?src="(.+?)"/g;
+    const imagesRegex = /class="card compact ok"[\s\S]*?href="(.+?)"/g;
+    const imagesLinks = [];
 
-    return imgUrls;
+    for (let mediaLink of mediaLinks) {
+        const imagesHtml = await requestGetText(mediaLink);
+        imagesLinks.push(...[...imagesHtml.matchAll(imagesRegex)].map( match => match[1] ));
+    }
+
+    return imagesLinks;
+
 }
