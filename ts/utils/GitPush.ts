@@ -2,13 +2,13 @@ import { Notice } from 'obsidian';
 import { exec } from 'child_process';
 import * as moment from 'moment';
 
-export async function gitPush(): Promise<boolean> {
+export async function gitPush(message: string = ""): Promise<boolean> {
     
     const todayDate = moment.utc().format('DD/MM/YYYY');
 
     try {
         await runCommand('git add .');
-        await runCommand(`git commit -m "${todayDate}"`);
+        await runCommand(`git commit -m "${todayDate} | ` + message + `"`);
         await runCommand('git push');
         new Notice('Git commit and push successful!');
     } catch (error) {

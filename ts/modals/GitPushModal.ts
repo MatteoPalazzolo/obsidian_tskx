@@ -11,8 +11,13 @@ export class GitPushModal extends Modal {
         contentEl.addClass("GitPushModal");
         contentEl.createEl('h3', { text: "Git Push" });
 
-        // Message
+        // Text
         contentEl.createEl('p', { text: "Do you wanna commit the work done so far?" });
+
+        // Optional Commit Message Input
+        const input = contentEl.createEl('input', { 
+            type: 'text', cls: 'text-input-class', placeholder: "optional commit message" 
+        });
 
         // Buttons container
         const buttonsDiv = contentEl.createDiv({ cls: 'button-container' });
@@ -20,7 +25,8 @@ export class GitPushModal extends Modal {
         // Accept Button
         const acceptButton = buttonsDiv.createEl('button', { text: 'Sure Af Dude', cls: 'mod-warning' });
         acceptButton.addEventListener('click', async () => {
-            const success = await gitPush(); 
+            const message: string = input.value && input.value.trim() !== "" ? input.value : ""; 
+            const success = await gitPush(message); 
             if (success) {
                 console.log("git push completed");
             } else {

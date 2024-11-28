@@ -67,6 +67,10 @@ If your plugin does not need CSS, delete this file.
 }
 
 .GitPushModal {
+    & input {
+        width: 100%;
+    }
+
     & .button-container {
         display: flex;
         justify-content: space-around;
@@ -75,3 +79,5 @@ If your plugin does not need CSS, delete this file.
     }
 
 }
+
+

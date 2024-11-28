@@ -69,7 +69,7 @@ export class BannerSearchModal extends Modal {
 
         this.getMediaTypeList().forEach( mt => selectEl.createEl("option", { text: mt }) );
         if (mediaType) {
-            selectEl.value = mediaType;
+            selectEl.value = Object.keys(this.MEDIA_TO_SCRAPER).includes(mediaType) ? mediaType : "All";
         } else {
             new Notice(`Target media type not detected.`);
         }
@@ -117,7 +117,7 @@ export class BannerSearchModal extends Modal {
         }
 
         const bannerList = [];
-        for (const func of this.MEDIA_TO_SCRAPER[mediaType]) {
+        for (const func of this.MEDIA_TO_SCRAPER[mediaType] ?? this.MEDIA_TO_SCRAPER["All"]) {
             const links = await func(name);
             bannerList.push(...links.slice(0,5));
         }
