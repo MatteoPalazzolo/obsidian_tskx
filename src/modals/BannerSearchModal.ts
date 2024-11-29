@@ -1,8 +1,8 @@
 import { App, Modal, Notice, TFile, setIcon } from 'obsidian';
-import { 
-    fetchSteamBanner, 
-    fetchItchioBanner, 
-    fetchTMDbBanner 
+import {
+    fetchSteamBanner,
+    fetchItchioBanner,
+    fetchTMDbBanner
 } from '../utils/FetchBanner';
 
 export class BannerSearchModal extends Modal {
@@ -12,7 +12,7 @@ export class BannerSearchModal extends Modal {
 
     HEADER_REGEX = /!\[header\]\((.*?)\)/;
     MEDIA_REGEX = /(?<=Analysis\/)[^/]+(?=\/)/;
-    MEDIA_TO_SCRAPER: {[key:string] : ((name: string) => Promise<string[]>)[] } = {
+    MEDIA_TO_SCRAPER: { [key: string]: ((name: string) => Promise<string[][]>)[] } = {
         All: [
             fetchSteamBanner,
             fetchItchioBanner,
@@ -49,14 +49,14 @@ export class BannerSearchModal extends Modal {
         contentEl.addClass("BannerSearchModal");
         contentEl.createEl('h3', { text: 'Banner Search' });
 
-        const searchBarDivEl =  contentEl.createDiv({ cls: 'input-container' });
+        const searchBarDivEl = contentEl.createDiv({ cls: 'input-container' });
 
         const inputEl = searchBarDivEl.createEl('input', {
-            type: 'text', cls: 'text-input-class', placeholder: 'game to search for...' 
+            type: 'text', cls: 'text-input-class', placeholder: 'game to search for...'
         });
-       
+
         const selectEl = searchBarDivEl.createEl('select', { type: 'text', cls: 'dropdown' });
-        
+
         const searchButtonEl = searchBarDivEl.createSpan({ cls: 'clickable-icon' });
         setIcon(searchButtonEl, 'search');
 
@@ -64,7 +64,7 @@ export class BannerSearchModal extends Modal {
         checkboxDiv.createEl('label', { cls: 'mod-checkbox', text: "replace current header image" });
         this.checkboxEl = checkboxDiv.createEl('input', { type: 'checkbox' });
 
-        contentEl.createEl("hr");
+        contentEl.createEl('hr');
 
         const imgContainerEl = contentEl.createDiv({ cls: 'images-container' });
 
@@ -77,7 +77,7 @@ export class BannerSearchModal extends Modal {
             new Notice(`Target filename not detected.`);
         }
 
-        this.getMediaTypeList().forEach( mt => selectEl.createEl("option", { text: mt }) );
+        this.getMediaTypeList().forEach(mt => selectEl.createEl("option", { text: mt }));
         if (mediaType) {
             selectEl.value = Object.keys(this.MEDIA_TO_SCRAPER).includes(mediaType) ? mediaType : "All";
         } else {
@@ -92,9 +92,9 @@ export class BannerSearchModal extends Modal {
                 this.searchAndLoadBanner(imgContainerEl, inputEl.value, selectEl.value);
             }
         });
-        
+
         // search on button click
-        searchButtonEl.addEventListener('click', (evt: MouseEvent) => 
+        searchButtonEl.addEventListener('click', (evt: MouseEvent) =>
             this.searchAndLoadBanner(imgContainerEl, inputEl.value, selectEl.value)
         );
 
@@ -105,7 +105,7 @@ export class BannerSearchModal extends Modal {
         contentEl.empty();
     }
 
-    private getMediaTypeList() : string[] {
+    private getMediaTypeList(): string[] {
         const mediaTypeList: string[] = [];
         this.app.vault.getFiles().forEach((file: TFile) => {
             const match = file.path.match(this.MEDIA_REGEX);
@@ -129,27 +129,33 @@ export class BannerSearchModal extends Modal {
         const bannerList = [];
         for (const func of this.MEDIA_TO_SCRAPER[mediaType] ?? this.MEDIA_TO_SCRAPER["All"]) {
             const links = await func(name);
-            bannerList.push(...links.slice(0,/*5*/undefined));
+            bannerList.push(...links);
         }
+        
+        console.info("bannerList", bannerList.flat());
 
         if (bannerList.length === 0) {
             parent.createSpan({ text: "no image found", cls: 'no-img-found' });
             return;
         }
 
-        bannerList.forEach(url => {
-            const img = parent.createEl('img', { attr: { src: url }, cls: "click" });
-            // onclick: copy to clipboard
-            img.addEventListener("click", (evt: MouseEvent) => {
-                const imgSrc = (evt.currentTarget as HTMLImageElement).src;
-                if (this.checkboxEl.checked) {
-                    this.replaceBannerImage(imgSrc);
-                } else {
-                    this.copyToClipboard(imgSrc);
-                }
-                
-            });
-        });
+        for (let urlPack of bannerList) {
+            if (urlPack.length === 0) {
+                continue;
+            }
+            for (let url of urlPack) {
+                const img = parent.createEl('img', { attr: { src: url }, cls: 'click' });
+                img.addEventListener("click", (evt: MouseEvent) => {
+                    const imgSrc = (evt.currentTarget as HTMLImageElement).src;
+                    if (this.checkboxEl.checked) {
+                        this.replaceBannerImage(imgSrc);
+                    } else {
+                        this.copyToClipboard(imgSrc);
+                    }
+                });
+            }
+            parent.createEl('hr');
+        }
     }
 
     private async replaceBannerImage(imgSrc: string) {
@@ -160,7 +166,7 @@ export class BannerSearchModal extends Modal {
         }
 
         const fileContent = await this.app.vault.read(activeFile);
-        
+
         const match = this.HEADER_REGEX.exec(fileContent);
         if (!match) {
             new Notice("No header image link found.");
@@ -176,16 +182,16 @@ export class BannerSearchModal extends Modal {
     private copyToClipboard(imgSrc: string) {
         navigator.clipboard.writeText(imgSrc).then(() => {
             new Notice('Link copiato nella clipboard!');
-            console.log('Link copiato nella clipboard!');
+            console.info('Link copiato nella clipboard!');
         }).catch(err => {
             new Notice('Errore nel copiare il testo:', err);
-            console.log('Errore nel copiare il testo:', err);
+            console.info('Errore nel copiare il testo:', err);
         });
     }
 
-    private getCurrentFileInfo() : { name: string | undefined, mediaType: string | undefined } {
+    private getCurrentFileInfo(): { name: string | undefined, mediaType: string | undefined } {
         const currentFile = this.app.workspace.getActiveFile();
-        
+
         if (!currentFile) {
             return {
                 name: undefined,

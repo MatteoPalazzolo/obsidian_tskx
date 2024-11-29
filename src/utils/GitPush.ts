@@ -22,7 +22,6 @@ export async function gitPush(message: string = ""): Promise<boolean> {
 async function runCommand(command:string) {
     
     const workingDirectory = this.app.vault.adapter.basePath + "\\..";
-    console.log(workingDirectory);
     
     return new Promise((resolve, reject) => {
         exec(command, { cwd: workingDirectory },  (error, stdout, stderr) => {

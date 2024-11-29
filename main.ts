@@ -1,8 +1,7 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-import { BannerSearchModal } from 'ts/modals/BannerSearchModal';
-import { GitPushModal } from 'ts/modals/GitPushModal';
-import { DefaultScannerModal } from 'ts/modals/DefaultScannerModal';
-
+import { Plugin } from 'obsidian';
+import { BannerSearchModal } from 'src/modals/BannerSearchModal';
+import { GitPushModal } from 'src/modals/GitPushModal';
+import { DefaultScannerModal } from 'src/modals/DefaultScannerModal';
 
 
 export default class extends Plugin {
@@ -18,4 +17,5 @@ export default class extends Plugin {
     onunload(): void {
         
     }
+
 }

@@ -28,9 +28,9 @@ export class GitPushModal extends Modal {
             const message: string = input.value && input.value.trim() !== "" ? input.value : ""; 
             const success = await gitPush(message); 
             if (success) {
-                console.log("git push completed");
+                console.info("git push completed");
             } else {
-                console.log("an error occurred during git push");
+                console.info("an error occurred during git push");
             }
             this.close();
         });

@@ -10,7 +10,7 @@ If your plugin does not need CSS, delete this file.
 .BannerSearchModal {
 
     .modal:has(&) {
-        width: 80%;
+        min-width: 80%;
     }
 
     & .input-container {
@@ -69,6 +69,10 @@ If your plugin does not need CSS, delete this file.
                 border: 2px green solid;
             }
     
+        }
+
+        & > hr {
+            width: 100%;
         }
     }
 
