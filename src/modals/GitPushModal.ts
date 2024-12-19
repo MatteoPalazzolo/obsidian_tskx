@@ -1,4 +1,4 @@
-import { App, Modal, Notice } from 'obsidian';
+import { App, Modal } from 'obsidian';
 import { gitPush } from "../utils/GitPush";
 
 export class GitPushModal extends Modal {
