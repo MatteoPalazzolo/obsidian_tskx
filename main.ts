@@ -22,13 +22,6 @@ export default class extends Plugin {
         this.addRibbonIcon('github', 'Git Push', (evt: MouseEvent) => new GitPushModal(this.app).open());
         this.addRibbonIcon('disc-3', 'Add Current Song', (evt: MouseEvent) => new SpotyImportModal(this.app, this.secretSettings).open());
 
-        /*
-        this.addRibbonIcon('disc-3', 'Add Current Song', (evt: MouseEvent) => addCurrentSong(
-            this.sdk,
-            this.secretSettings.clientId,
-            this.secretSettings.secretId
-        ));
-        */
         this.registerSpotifyMarkdownPostProcessor();
     }
 
@@ -37,25 +30,6 @@ export default class extends Plugin {
     }
 
     private async loadSecretSettings() {
-        // is this mobile friendly ???
-
-        /*
-        const sensitiveFilePath = path.join((this.app.vault.adapter as FileSystemAdapter).getBasePath(), this.manifest.dir ?? "", "secret-settings.json");
-
-        if (fs.existsSync(sensitiveFilePath)) {
-            const data = fs.readFileSync(sensitiveFilePath, "utf-8");
-            this.secretSettings = JSON.parse(data);
-        } else {
-            new Notice("secret-settings.json NOT found!");
-        }
-        */
-        /*
-        const file = this.app.vault.getAbstractFileByPath('folderOrFile');
-        if (file instanceof TFile) {
-            console.log('It\'s a file!');
-        }
-        */
-
         const secretSettingsFilePath = (this.manifest.dir ?? "") + "/secret-settings.json";
         const data = await this.app.vault.adapter.read(secretSettingsFilePath);
         
