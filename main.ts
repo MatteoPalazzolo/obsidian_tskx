@@ -14,7 +14,7 @@ export default class extends Plugin {
 
     async onload(): Promise<void> {
         // https://lucide.dev/
-
+        
         await this.loadSecretSettings();
 
         this.addRibbonIcon('image-plus', 'Search Banner', (evt: MouseEvent) => new BannerSearchModal(this.app).open());

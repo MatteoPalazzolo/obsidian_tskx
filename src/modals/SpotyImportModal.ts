@@ -17,6 +17,7 @@ export class SpotyImportModal extends Modal {
         }
 
         const sdk: SpotifyApi = SpotifyApi.withClientCredentials(this.secretSettings.clientId, this.secretSettings.secretId);
+        const templaterAPI = this.getTemplaterAPI()
 
         const {contentEl} = this;
         contentEl.addClass("SpotyImportModal");
@@ -63,6 +64,31 @@ export class SpotyImportModal extends Modal {
         contentEl.empty();
     }
 
+    getTemplaterAPI(): any { 
+        
+        console.log(this.app.plugins.plugins["templater-obsidian"]);
+
+        // Verifica se Templater è attivo
+        const templaterPlugin = this.app.plugins.plugins["templater-obsidian"];
+        if (!templaterPlugin) {
+            new Notice("Templater plugin is not enabled.");
+            return;
+        }
+
+        // Recupera Templater API
+        const templaterAPI = templaterPlugin.templater;
+        if (!templaterAPI) {
+            new Notice("Templater API not available.");
+            return;
+        }
+
+        console.log(templaterAPI.read_and_parse_template)
+        console.log(templaterAPI.read_and_parse_template({template_file:"hola", target_file:"hola"}))
+
+        return templaterAPI;
+
+    }
+
     async processSpotifyLink(ansContainerEl: HTMLDivElement , sdk: SpotifyApi, link: string) {
 
         /* use regex to find type and id */
@@ -94,18 +120,38 @@ export class SpotyImportModal extends Modal {
     async processSpotifyTrackLink(ansContainerEl: HTMLDivElement , sdk: SpotifyApi, thisId: string) {
         const ans = await sdk.tracks.get(thisId);
         console.log(ans);
-    }
 
+        const newFilePath = "Analysis/Music/Canzoni/" + ans.name + ".md";
+        const newFileContent = `---
+name: ${ans.name}
+author: 
+  - ${ans.artists.map(a => a.name).join("\n  - ")}
+---
+
+# ${ans.name}
+
+`;
+        
+        await this.app.vault.create(newFilePath, newFileContent).catch( (error:Error) => {
+            new Notice("Failed to create note:\n" + error.message.split("\n")[0])
+            console.error(error);
+        });
+
+    }
     
     async processSpotifyAlbumLink(ansContainerEl: HTMLDivElement , sdk: SpotifyApi, thisId: string) {
         const ans = await sdk.albums.get(thisId);
         console.log(ans);
+        ans.name;
+
     }
 
     
     async processSpotifyArtistLink(ansContainerEl: HTMLDivElement , sdk: SpotifyApi, thisId: string) {
         const ans = await sdk.artists.get(thisId);
         console.log(ans);
+        ans.name;
+
     }
 
 }
