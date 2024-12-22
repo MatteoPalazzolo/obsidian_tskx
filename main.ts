@@ -1,12 +1,10 @@
-import { Plugin, Notice, FileSystemAdapter } from 'obsidian';
+import { Plugin, Notice, FileSystemAdapter, TFile } from 'obsidian';
 import { BannerSearchModal } from 'src/modals/BannerSearchModal';
 import { GitPushModal } from 'src/modals/GitPushModal';
 import { DefaultScannerModal } from 'src/modals/DefaultScannerModal';
 import { SpotyImportModal } from 'src/modals/SpotyImportModal';
 import { SpotifyApi } from '@spotify/web-api-ts-sdk';
 import { SecretSettings } from 'src/types';
-import * as fs from "fs";
-import * as path from "path";
 
 
 export default class extends Plugin {
@@ -14,16 +12,16 @@ export default class extends Plugin {
     sdk: SpotifyApi;
     secretSettings: SecretSettings;
 
-    onload(): Promise<void> | void {
+    async onload(): Promise<void> {
         // https://lucide.dev/
-        
-        this.loadSecretSettings();
-        
+
+        await this.loadSecretSettings();
+
         this.addRibbonIcon('image-plus', 'Search Banner', (evt: MouseEvent) => new BannerSearchModal(this.app).open());
         this.addRibbonIcon('scan-eye', 'Default Banner Scan', (evt: MouseEvent) => new DefaultScannerModal(this.app).open());
         this.addRibbonIcon('github', 'Git Push', (evt: MouseEvent) => new GitPushModal(this.app).open());
         this.addRibbonIcon('disc-3', 'Add Current Song', (evt: MouseEvent) => new SpotyImportModal(this.app, this.secretSettings).open());
-        
+
         /*
         this.addRibbonIcon('disc-3', 'Add Current Song', (evt: MouseEvent) => addCurrentSong(
             this.sdk,
@@ -38,8 +36,10 @@ export default class extends Plugin {
 
     }
 
-    private loadSecretSettings() {
+    private async loadSecretSettings() {
         // is this mobile friendly ???
+
+        /*
         const sensitiveFilePath = path.join((this.app.vault.adapter as FileSystemAdapter).getBasePath(), this.manifest.dir ?? "", "secret-settings.json");
 
         if (fs.existsSync(sensitiveFilePath)) {
@@ -48,6 +48,24 @@ export default class extends Plugin {
         } else {
             new Notice("secret-settings.json NOT found!");
         }
+        */
+        /*
+        const file = this.app.vault.getAbstractFileByPath('folderOrFile');
+        if (file instanceof TFile) {
+            console.log('It\'s a file!');
+        }
+        */
+
+        const secretSettingsFilePath = (this.manifest.dir ?? "") + "/secret-settings.json";
+        const data = await this.app.vault.adapter.read(secretSettingsFilePath);
+        
+        if (data) {
+            this.secretSettings = JSON.parse(data);
+            new Notice("secret-settings.json FOUND!");
+        } else {
+            new Notice("secret-settings.json NOT FOUND!");
+        }
+
     }
 
     private registerSpotifyMarkdownPostProcessor() {

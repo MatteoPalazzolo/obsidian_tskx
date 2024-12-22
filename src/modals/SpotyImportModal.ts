@@ -58,7 +58,7 @@ export class SpotyImportModal extends Modal {
 
         searchButtonEl.addEventListener('click', evt => {
             this.processSpotifyLink(ansContainerEl, sdk, inputEl.value);
-            
+
         });
 
     }
@@ -70,6 +70,12 @@ export class SpotyImportModal extends Modal {
 
     processSpotifyLink(ansContainerEl: HTMLDivElement , sdk: SpotifyApi, link: string) {
         console.log(link);
+
+        /* use regex to find type and id */
+        /* use id to fetch info from api */
+        /* put info in a form to allow user to edit them */
+        /* take edited data and use it to create a new note */
+         
     }
 
 }
