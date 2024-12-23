@@ -2,7 +2,7 @@ import { Plugin, Notice, FileSystemAdapter, TFile } from 'obsidian';
 import { BannerSearchModal } from 'src/modals/BannerSearchModal';
 import { GitPushModal } from 'src/modals/GitPushModal';
 import { DefaultScannerModal } from 'src/modals/DefaultScannerModal';
-import { SpotyImportModal } from 'src/modals/SpotyImportModal';
+import { SpotifyImportModal } from 'src/modals/SpotifyImportModal';
 import { SpotifyApi } from '@spotify/web-api-ts-sdk';
 import { SecretSettings } from 'src/types';
 
@@ -20,9 +20,10 @@ export default class extends Plugin {
         this.addRibbonIcon('image-plus', 'Search Banner', (evt: MouseEvent) => new BannerSearchModal(this.app).open());
         this.addRibbonIcon('scan-eye', 'Default Banner Scan', (evt: MouseEvent) => new DefaultScannerModal(this.app).open());
         this.addRibbonIcon('github', 'Git Push', (evt: MouseEvent) => new GitPushModal(this.app).open());
-        this.addRibbonIcon('disc-3', 'Add Current Song', (evt: MouseEvent) => new SpotyImportModal(this.app, this.secretSettings).open());
+        this.addRibbonIcon('disc-3', 'Add Current Song', (evt: MouseEvent) => new SpotifyImportModal(this.app, this.secretSettings).open());
 
         this.registerSpotifyMarkdownPostProcessor();
+        
     }
 
     onunload(): void {
@@ -47,7 +48,6 @@ export default class extends Plugin {
 
             element.querySelectorAll("p").forEach(p => {
                 const text = element.textContent?.trim() ?? "";
-                console.log(text);
                 const match = text.match(/(?:https|http):\/\/open.spotify.com.*?\/(\w*)\/(\w*)(?:$|\?)/);
                 if (match) {
                     const [, thisType, thisId] = match;
@@ -55,10 +55,10 @@ export default class extends Plugin {
                     iframe.classList.add('spotify-iframe');
                     iframe.src = `https://open.spotify.com/embed/${thisType}/${thisId}?theme=1`;
                     iframe.loading = "lazy";
-                    console.log("callback called");
                     p.replaceWith(iframe);
                 }
             });
+            
         });
     }
 
