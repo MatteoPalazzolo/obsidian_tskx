@@ -1,6 +1,6 @@
 import { App, Modal, Notice, setIcon, TFile } from 'obsidian';
 import { NewSpotifyTrackData, SecretSettings } from "../types";
-import { SpotifyApi } from '@spotify/web-api-ts-sdk';
+import { SpotifyApi, Track } from '@spotify/web-api-ts-sdk';
 import dayjs from "dayjs";
 
 export class SpotifyImportModal extends Modal {
@@ -13,15 +13,15 @@ export class SpotifyImportModal extends Modal {
     }
 
     async onOpen() {
-        
+
         if (!this.secretSettings.clientId || !this.secretSettings.secretId) {
             new Notice("Secret Spotify Credentials NOT FOUND!");
-            return; 
+            return;
         }
 
         const sdk: SpotifyApi = SpotifyApi.withClientCredentials(this.secretSettings.clientId, this.secretSettings.secretId);
 
-        const {contentEl} = this;
+        const { contentEl } = this;
         contentEl.addClass("SpotifyImportModal");
         contentEl.createEl('h3', { text: "Import from Spotify" });
 
@@ -34,13 +34,13 @@ export class SpotifyImportModal extends Modal {
 
         const searchButtonEl = searchBarDivEl.createSpan({ cls: 'clickable-icon' });
         setIcon(searchButtonEl, 'search');
-        
+
         // Separation Line
         contentEl.createEl('hr');
-        
+
         // Generated Content Div
         const ansContainerEl = contentEl.createDiv({ cls: 'ans-container' });
-        ansContainerEl.createSpan({text:"test"});
+        ansContainerEl.createSpan({ text: "test" });
 
         // Link SearchBar Events
         inputEl.addEventListener('paste', evt => {
@@ -48,7 +48,7 @@ export class SpotifyImportModal extends Modal {
             const pastedText = evt.clipboardData?.getData('text') ?? "";
             inputEl.value = pastedText;
             this.processSpotifyLink(ansContainerEl, sdk, pastedText);
-        
+
         });
 
         inputEl.addEventListener('keydown', evt => {
@@ -63,13 +63,13 @@ export class SpotifyImportModal extends Modal {
         });
 
     }
-    
+
     onClose() {
-        const {contentEl} = this;
+        const { contentEl } = this;
         contentEl.empty();
     }
 
-    async processSpotifyLink(ansContainerEl: HTMLDivElement , sdk: SpotifyApi, link: string) {
+    async processSpotifyLink(ansContainerEl: HTMLDivElement, sdk: SpotifyApi, link: string) {
 
         /* use regex to find type and id */
         const match = link.match(/(?:https|http):\/\/open.spotify.com.*?\/(\w*)\/(\w*)(?:$|\?)/);
@@ -78,46 +78,73 @@ export class SpotifyImportModal extends Modal {
             return;
         }
         const [, thisType, thisId] = match;
-                
+
         /* use id to fetch info from api */
-        let newFile: undefined | TFile = undefined;
-        switch(thisType) {
+        switch (thisType) {
             case "track":
-                newFile = await this.processSpotifyTrackLink(ansContainerEl, sdk, thisId);
+                await this.processSpotifyTrackLink(ansContainerEl, sdk, thisId);
                 break;
             case "album":
-                newFile = await this.processSpotifyAlbumLink(ansContainerEl, sdk, thisId);
+                await this.processSpotifyAlbumLink(ansContainerEl, sdk, thisId);
                 break;
             case "artist":
-                newFile = await this.processSpotifyArtistLink(ansContainerEl, sdk, thisId);
+                await this.processSpotifyArtistLink(ansContainerEl, sdk, thisId);
                 break;
             default:
                 new Notice("Invalid URL (2)");
-                return; 
+                return;
         }
-        
-        if (newFile) {
-            this.app.workspace.getLeaf(false).openFile(newFile);
-        }
-         
+
+
     }
 
     // put info in a form to allow user to edit them
-    async processSpotifyTrackLink(ansContainerEl: HTMLDivElement , sdk: SpotifyApi, thisId: string) {
-        const ans = await sdk.tracks.get(thisId);
+    async processSpotifyTrackLink(ansContainerEl: HTMLDivElement, sdk: SpotifyApi, thisId: string) {
+        ansContainerEl.empty();
+
+        const ans: Track = await sdk.tracks.get(thisId);
         console.log(ans);
 
-        ansContainerEl.empty();
-        const newAns: NewSpotifyTrackData = ans;
+        const newAns: NewSpotifyTrackData = {
+            filename: "",
+            name: ans.name,
+            track_number: ans.track_number,
+            artists: ans.artists.map(a => a.name),
+            album: ans.album.name
+        };
+        console.log(newAns);
+
+        ansContainerEl.createEl('h1', { text: "Spotify Track" });
         
-        return await this.commitSpotifyTrackLink(ans, thisId);
+        const fileNameInput = ansContainerEl.createEl('input', {
+            type: 'text', cls: 'text-input-class', value: ans.name, placeholder: "File Name"
+        });
+
+        ansContainerEl.createEl('h5', { text: "Details" });
+        // TODO: improve everything!
+        const trackDataSpans = Object.entries(newAns).filter(([k, v]) => k !== "filename").map(([k, v]) =>
+            ansContainerEl.createEl('p', {
+                text: k + ": " + v
+            })
+        );
+
+        // Commit Button
+        ansContainerEl.createEl(
+            'button', 
+            { text: 'Sure Af Dude', cls: 'mod-warning' }
+        ).addEventListener('click', async () => {
+            // TODO: check che il nome del file non sia già presente
+            newAns.filename = fileNameInput.value;
+            await this.commitSpotifyTrackLink(newAns, thisId);
+            this.close();
+        });
 
     }
 
     // take edited data and use it to create a new note
-    async commitSpotifyTrackLink(ans: NewSpotifyTrackData, thisId: string) : Promise<undefined | TFile> {
+    async commitSpotifyTrackLink(ans: NewSpotifyTrackData, thisId: string) {
         const forbiddenCharsRegex = /[*"\/<>:|?]{1}/g;
-        const newFilePath = "Analysis/Music/Canzoni/" + ans.name.replace(forbiddenCharsRegex, "_")  + ".md";
+        const newFilePath = "Analysis/Music/Canzoni/" + ans.filename.replace(forbiddenCharsRegex, "_") + ".md";
 
         const SONG_TEMPLATE_PATH = "!Templates/Music Song Analysis Template.md"
 
@@ -125,35 +152,38 @@ export class SpotifyImportModal extends Modal {
 
         if (!file || !(file instanceof TFile)) {
             new Notice(SONG_TEMPLATE_PATH + " NOT FOUND!");
-            return; 
+            return;
         }
 
         const newFileContent = (await this.app.vault.cachedRead(file))
-        .replace("<% tp.date.now(\"YYYY-MM-DD\") %>", dayjs().format("YYYY-MM-DD"))
-        .replace("{author}", ans.name)
-        .replace("{album}", "\n  - " + ans.artists.map( a => a.name ).join("\n  - "))
-        .replace("{index}", ""+ans.track_number)
-        .replace("https://open.spotify.com/track/", `https://open.spotify.com/embed/track/${thisId}?theme=1`);
-        
-        const newFile = await this.app.vault.create(newFilePath, newFileContent).catch( (error:Error) => {
+            .replace("<% tp.date.now(\"YYYY-MM-DD\") %>", dayjs().format("YYYY-MM-DD"))
+            .replace("{name}", ans.name)
+            .replace("{author}", "\n  - " + ans.artists.join("\n  - "))
+            .replace("{album}", ans.album)
+            .replace("{index}", "" + ans.track_number)
+            .replace("https://open.spotify.com/track/", `https://open.spotify.com/embed/track/${thisId}?theme=1`);
+
+        const newFile = await this.app.vault.create(newFilePath, newFileContent).catch((error: Error) => {
             new Notice("Failed to create note:\n" + error.message.split("\n")[0])
             console.error(error);
         });
 
-        return newFile as undefined | TFile;
+        if (newFile) {
+            this.app.workspace.getLeaf(false).openFile(newFile);
+        }
     }
-    
-    
-    async processSpotifyAlbumLink(ansContainerEl: HTMLDivElement , sdk: SpotifyApi, thisId: string) : Promise<undefined | TFile>  {
+
+
+    async processSpotifyAlbumLink(ansContainerEl: HTMLDivElement, sdk: SpotifyApi, thisId: string): Promise<undefined | TFile> {
         const ans = await sdk.albums.get(thisId);
         console.log(ans);
         ans.name;
         return;
-        
+
     }
 
-    
-    async processSpotifyArtistLink(ansContainerEl: HTMLDivElement , sdk: SpotifyApi, thisId: string) : Promise<undefined | TFile>  {
+
+    async processSpotifyArtistLink(ansContainerEl: HTMLDivElement, sdk: SpotifyApi, thisId: string): Promise<undefined | TFile> {
         const ans = await sdk.artists.get(thisId);
         console.log(ans);
         ans.name;
