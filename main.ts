@@ -22,7 +22,7 @@ export default class extends Plugin {
         this.addRibbonIcon('github', 'Git Push', (evt: MouseEvent) => new GitPushModal(this.app).open());
         this.addRibbonIcon('disc-3', 'Add Current Song', (evt: MouseEvent) => new SpotifyImportModal(this.app, this.secretSettings).open());
 
-        this.registerSpotifyMarkdownPostProcessor();
+        this.registerIframeMarkdownPostProcessor();
         
     }
 
@@ -43,20 +43,34 @@ export default class extends Plugin {
 
     }
 
-    private registerSpotifyMarkdownPostProcessor() {
+    private registerIframeMarkdownPostProcessor() {
         this.registerMarkdownPostProcessor((element, context) => {
 
             element.querySelectorAll("p").forEach(p => {
                 const text = element.textContent?.trim() ?? "";
-                const match = text.match(/(?:https|http):\/\/open.spotify.com.*?\/(\w*)\/(\w*)(?:$|\?)/);
-                if (match) {
-                    const [, thisType, thisId] = match;
+
+                const spotifyMatch = text.match(/(?:https|http):\/\/open.spotify.com.*?\/(\w*)\/(\w*)(?:$|\?)/);
+                if (spotifyMatch) {
+                    const [, thisType, thisId] = spotifyMatch;
                     const iframe = document.createElement("iframe");
                     iframe.classList.add('spotify-iframe');
+                    iframe.classList.add(thisType);
                     iframe.src = `https://open.spotify.com/embed/${thisType}/${thisId}?theme=1`;
                     iframe.loading = "lazy";
                     p.replaceWith(iframe);
                 }
+
+                const youtubeMatch = text.match(/(?:https|http):\/\/youtu.be\/(\w+)(?:$|\?)|(?:https|http):\/\/www.youtube.com\/embed\/(\w+)(?:$|\?)|(?:https|http):\/\/www.youtube.com\/watch\?v=(\w+)(?:$|&)/);
+                if (youtubeMatch) {
+                    const [, thisId] = youtubeMatch.filter(id => id);
+                    console.log(thisId)
+                    const iframe = document.createElement("iframe");
+                    iframe.classList.add('youtube-iframe');
+                    iframe.src = `https://www.youtube.com/embed/${thisId}`;
+                    iframe.loading = "lazy";
+                    p.replaceWith(iframe);
+                }
+
             });
             
         });

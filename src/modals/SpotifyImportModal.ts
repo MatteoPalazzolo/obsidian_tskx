@@ -40,9 +40,9 @@ export class SpotifyImportModal extends Modal {
 
         // Generated Content Div
         const ansContainerEl = contentEl.createDiv({ cls: 'ans-container' });
-        ansContainerEl.createSpan({ text: "test" });
 
         // Link SearchBar Events
+
         inputEl.addEventListener('paste', evt => {
             evt.preventDefault();
             const pastedText = evt.clipboardData?.getData('text') ?? "";
@@ -69,9 +69,12 @@ export class SpotifyImportModal extends Modal {
         contentEl.empty();
     }
 
+    private isFilenameAvaliable(filename: string): boolean {
+        return this.app.vault.getFiles().filter(file => file.basename === filename).length === 0;
+    }
+
     async processSpotifyLink(ansContainerEl: HTMLDivElement, sdk: SpotifyApi, link: string) {
 
-        /* use regex to find type and id */
         const match = link.match(/(?:https|http):\/\/open.spotify.com.*?\/(\w*)\/(\w*)(?:$|\?)/);
         if (!match) {
             new Notice("Invalid URL (1)");
@@ -79,7 +82,6 @@ export class SpotifyImportModal extends Modal {
         }
         const [, thisType, thisId] = match;
 
-        /* use id to fetch info from api */
         switch (thisType) {
             case "track":
                 await this.processSpotifyTrackLink(ansContainerEl, sdk, thisId);
@@ -98,7 +100,6 @@ export class SpotifyImportModal extends Modal {
 
     }
 
-    // put info in a form to allow user to edit them
     async processSpotifyTrackLink(ansContainerEl: HTMLDivElement, sdk: SpotifyApi, thisId: string) {
         ansContainerEl.empty();
 
@@ -106,7 +107,6 @@ export class SpotifyImportModal extends Modal {
         console.log(ans);
 
         const newAns: NewSpotifyTrackData = {
-            filename: "",
             name: ans.name,
             track_number: ans.track_number,
             artists: ans.artists.map(a => a.name),
@@ -114,37 +114,57 @@ export class SpotifyImportModal extends Modal {
         };
         console.log(newAns);
 
-        ansContainerEl.createEl('h1', { text: "Spotify Track" });
+        ansContainerEl.createEl('h4', { text: "Spotify Track" });
         
-        const fileNameInput = ansContainerEl.createEl('input', {
-            type: 'text', cls: 'text-input-class', value: ans.name, placeholder: "File Name"
+        const inputDiv = ansContainerEl.createDiv({ cls: 'input-div' });
+        inputDiv.createEl('h6', { text: "Filename" });
+        const fileNameInput = inputDiv.createEl('input', {
+            type: 'text', cls: 'text-input-class' + (this.isFilenameAvaliable(ans.name) ? '' : ' error'),
+            value: ans.name, placeholder: "File Name"
         });
-
-        ansContainerEl.createEl('h5', { text: "Details" });
-        // TODO: improve everything!
-        const trackDataSpans = Object.entries(newAns).filter(([k, v]) => k !== "filename").map(([k, v]) =>
-            ansContainerEl.createEl('p', {
-                text: k + ": " + v
+        fileNameInput.addEventListener('input', evt => {
+            if (this.isFilenameAvaliable(fileNameInput.value.trim())) {
+                fileNameInput.classList.remove('error');
+            } else {
+                fileNameInput.classList.add('error');
+            }
+        });
+        
+        Object.entries({
+            "```DETAILS": "",
+            "Name: ": newAns.name,
+            "Artists: ": newAns.artists.join(", "),
+            "Album: ": newAns.album,
+            "Index: ": newAns.track_number,
+            "```": ""
+        }).map(([k, v]) =>
+            ansContainerEl.createDiv({
+                cls: 'show-details-div'
+            }).createSpan({
+                text: k + v
             })
         );
 
         // Commit Button
-        ansContainerEl.createEl(
-            'button', 
+        ansContainerEl.createDiv(
+            { cls: 'confirm-note-creation-div' }
+        ).createEl('button', 
             { text: 'Sure Af Dude', cls: 'mod-warning' }
         ).addEventListener('click', async () => {
-            // TODO: check che il nome del file non sia già presente
-            newAns.filename = fileNameInput.value;
-            await this.commitSpotifyTrackLink(newAns, thisId);
+            if (!this.isFilenameAvaliable(fileNameInput.value)) {
+                new Notice("ERROR: File Already Exists!")
+                return;
+            }
+            await this.commitSpotifyTrackLink(fileNameInput.value, newAns, thisId);
             this.close();
         });
 
     }
 
     // take edited data and use it to create a new note
-    async commitSpotifyTrackLink(ans: NewSpotifyTrackData, thisId: string) {
+    async commitSpotifyTrackLink(filename: string, ans: NewSpotifyTrackData, thisId: string) {
         const forbiddenCharsRegex = /[*"\/<>:|?]{1}/g;
-        const newFilePath = "Analysis/Music/Canzoni/" + ans.filename.replace(forbiddenCharsRegex, "_") + ".md";
+        const newFilePath = "Analysis/Music/Canzoni/" + filename.trim().replace(forbiddenCharsRegex, "_") + ".md";
 
         const SONG_TEMPLATE_PATH = "!Templates/Music Song Analysis Template.md"
 

@@ -5,7 +5,6 @@ export interface SecretSettings {
 };
 
 export interface NewSpotifyTrackData {
-    filename: string,
     name: string,
     album: string,
     artists: string[],
