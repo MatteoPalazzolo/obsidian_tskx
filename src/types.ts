@@ -10,3 +10,11 @@ export interface NewSpotifyTrackData {
     artists: string[],
     track_number: number
 }
+
+export interface NewSpotifyAlbumData {
+    name: string
+}
+
+export interface NewSpotifyArtistData {
+    name: string
+}
