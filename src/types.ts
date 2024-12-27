@@ -1,7 +1,9 @@
 
 export interface SecretSettings {
-    clientId: string, 
-    secretId: string
+    spotify: {
+        clientId: string, 
+        secretId: string    
+    }
 };
 
 export interface NewSpotifyTrackData {

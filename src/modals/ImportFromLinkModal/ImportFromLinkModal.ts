@@ -1,11 +1,11 @@
 import { App, Modal, Notice, setIcon, TFile } from 'obsidian';
-import { NewSpotifyAlbumData, NewSpotifyArtistData, NewSpotifyTrackData, SecretSettings } from "../types";
+import { NewSpotifyAlbumData, NewSpotifyArtistData, NewSpotifyTrackData, SecretSettings } from "../../types";
 import { Album, Artist, SpotifyApi, Track } from '@spotify/web-api-ts-sdk';
 import dayjs from "dayjs";
 
-// TODO: generalizzare a LinkImportModal
-export class SpotifyImportModal extends Modal {
+export class ImportFromLinkModal extends Modal {
 
+    // TODO: aggiungere un dizionario che faccia da config 
     TRACK_FOLDER = "Analysis/Musica/Canzoni/";
     ALBUM_FOLDER = "Analysis/Musica/Album/";
     ARTIST_FOLDER = "Analysis/Musica/Artisti/";
@@ -19,24 +19,19 @@ export class SpotifyImportModal extends Modal {
 
     async onOpen() {
 
-        if (!this.secretSettings.clientId || !this.secretSettings.secretId) {
-            new Notice("Secret Spotify Credentials NOT FOUND!");
-            return;
-        }
-
-        const sdk: SpotifyApi = SpotifyApi.withClientCredentials(this.secretSettings.clientId, this.secretSettings.secretId);
-
+        // Title
         const { contentEl } = this;
-        contentEl.addClass("SpotifyImportModal");
+        contentEl.addClass("ImportFromLinkModal");
         contentEl.createEl('h3', { text: "Import from link" });
 
-        // Link SearchBar
+        // Search Input
         const searchBarDivEl = contentEl.createDiv({ cls: 'input-container' });
 
         const inputEl = searchBarDivEl.createEl('input', {
             type: 'text', cls: 'text-input-class', placeholder: 'enter link'
         });
 
+        // Search Button
         const searchButtonEl = searchBarDivEl.createSpan({ cls: 'clickable-icon' });
         setIcon(searchButtonEl, 'search');
 
@@ -47,24 +42,23 @@ export class SpotifyImportModal extends Modal {
         const ansContainerEl = contentEl.createDiv({ cls: 'ans-container' });
 
         // Link SearchBar Events
-
         inputEl.addEventListener('paste', evt => {
             evt.preventDefault();
             const pastedText = evt.clipboardData?.getData('text') ?? "";
             inputEl.value = pastedText;
-            this.processSpotifyLink(ansContainerEl, sdk, pastedText);
+            this.processLink(ansContainerEl, pastedText);
 
         });
 
         inputEl.addEventListener('keydown', evt => {
             if (evt.key === "Enter") {
-                this.processSpotifyLink(ansContainerEl, sdk, inputEl.value);
+                this.processLink(ansContainerEl,inputEl.value);
 
             }
         });
 
         searchButtonEl.addEventListener('click', evt => {
-            this.processSpotifyLink(ansContainerEl, sdk, inputEl.value);
+            this.processLink(ansContainerEl,inputEl.value);
         });
 
     }
@@ -81,39 +75,50 @@ export class SpotifyImportModal extends Modal {
     }
 
     
-    private async processSpotifyLink(ansContainerEl: HTMLDivElement, sdk: SpotifyApi, link: string) {
+    private processLink(ansContainerEl: HTMLDivElement, link: string) {
 
         const match = link.match(/(?:https|http):\/\/open.spotify.com.*?\/(\w*)\/(\w*)(?:$|\?)/);
-        if (!match) {
-            new Notice("Invalid URL (1)");
-            return;
+        if (match) {
+            const [, thisType, thisId] = match;
+            switch (thisType) {
+                case "track":
+                    this.processSpotifyTrackLink(ansContainerEl, thisId);
+                    return;
+                case "album":
+                    this.processSpotifyAlbumLink(ansContainerEl, thisId);
+                    return;
+                case "artist":
+                    this.processSpotifyArtistLink(ansContainerEl, thisId);
+                    return;
+                default:
+                    new Notice("Invalid Spotify URL");
+                    return;
+            }
         }
-        const [, thisType, thisId] = match;
-
-        switch (thisType) {
-            case "track":
-                await this.processSpotifyTrackLink(ansContainerEl, sdk, thisId);
-                break;
-            case "album":
-                await this.processSpotifyAlbumLink(ansContainerEl, sdk, thisId);
-                break;
-            case "artist":
-                await this.processSpotifyArtistLink(ansContainerEl, sdk, thisId);
-                break;
-            default:
-                new Notice("Invalid URL (2)");
-                return;
-        }
-
-
+        
+        new Notice("Invalid URL");
+        
     }
 
 
-    async processSpotifyTrackLink(ansContainerEl: HTMLDivElement, sdk: SpotifyApi, thisId: string) {
+    // TODO: spostare tutta la logica in molteplici nuovi file
+
+    async processSpotifyTrackLink(ansContainerEl: HTMLDivElement, thisId: string) {
+        
+        ansContainerEl.empty();
 
         /////////////////////////////
 
-        ansContainerEl.empty();
+        const {clientId, secretId} = this.secretSettings.spotify;
+
+        if (!clientId || !secretId) {
+            new Notice("Secret Spotify Credentials NOT FOUND!");
+            return;
+        }
+
+        const sdk: SpotifyApi = SpotifyApi.withClientCredentials(clientId, secretId);
+
+        /////////////////////////////
 
         const ans: Track = await sdk.tracks.get(thisId);
         console.log(ans);
@@ -211,12 +216,23 @@ export class SpotifyImportModal extends Modal {
     }
 
 
-    async processSpotifyAlbumLink(ansContainerEl: HTMLDivElement, sdk: SpotifyApi, thisId: string) {
+    async processSpotifyAlbumLink(ansContainerEl: HTMLDivElement, thisId: string) {
         
-        /////////////////////////////
-
         ansContainerEl.empty();
 
+        ///////////////////////////// SHARED
+
+        const {clientId, secretId} = this.secretSettings.spotify;
+
+        if (!clientId || !secretId) {
+            new Notice("Secret Spotify Credentials NOT FOUND!");
+            return;
+        }
+
+        const sdk: SpotifyApi = SpotifyApi.withClientCredentials(clientId, secretId);
+
+        ///////////////////////////// SPECIFIC
+        // const ans = getData(thisId:string);
         const ans: Album = await sdk.albums.get(thisId);
         console.log(ans);
 
@@ -225,7 +241,7 @@ export class SpotifyImportModal extends Modal {
         };
         console.log(newAns);
 
-        /////////////////////////////
+        ///////////////////////////// SHARED(title:string, folder:string)
 
         ansContainerEl.createEl('h4', { text: "Spotify Album" });
         
@@ -243,7 +259,7 @@ export class SpotifyImportModal extends Modal {
             }
         });
 
-        /////////////////////////////
+        ///////////////////////////// SHARED(toprint:string[])
         
         Object.entries({
             "```DETAILS": "",
@@ -257,7 +273,7 @@ export class SpotifyImportModal extends Modal {
             })
         );
 
-        /////////////////////////////
+        ///////////////////////////// SHARED(ctx, folder:string)
 
         // Commit Button
         ansContainerEl.createDiv(
@@ -276,6 +292,9 @@ export class SpotifyImportModal extends Modal {
     }
 
     async commitSpotifyAlbumLink(filename: string, ans: NewSpotifyAlbumData, thisId: string) {
+
+        ///////////////////////////// SHARED(ctx, folder:string, teplate_path:string)
+
         const forbiddenCharsRegex = /[*"\/<>:|?]{1}/g;
         const newFilePath = this.ALBUM_FOLDER + filename.trim().replace(forbiddenCharsRegex, "_") + ".md";
 
@@ -288,10 +307,17 @@ export class SpotifyImportModal extends Modal {
             return;
         }
 
+        ///////////////////////////// SPECIFIC
+        // const templateContent = await this.app.vault.cachedRead(file);
+        // const newFileContent = processTemplate(ctx, templateContent:string, ans:dict, thisId?:string);
+
         const newFileContent = (await this.app.vault.cachedRead(file))
             .replace("<% tp.date.now(\"YYYY-MM-DD\") %>", dayjs().format("YYYY-MM-DD"))
             .replace("{title}", ans.name)
             .replace("https://open.spotify.com/album/", `https://open.spotify.com/album/${thisId}`);
+
+            
+        ///////////////////////////// SHARED(ctx)
             
         const newFile = await this.app.vault.create(newFilePath, newFileContent).catch((error: Error) => {
             new Notice("Failed to create note:\n" + error.message.split("\n")[0])
@@ -304,11 +330,22 @@ export class SpotifyImportModal extends Modal {
     }
 
 
-    async processSpotifyArtistLink(ansContainerEl: HTMLDivElement, sdk: SpotifyApi, thisId: string) {
+    async processSpotifyArtistLink(ansContainerEl: HTMLDivElement, thisId: string) {
+
+        ansContainerEl.empty();
 
         /////////////////////////////
 
-        ansContainerEl.empty();
+        const {clientId, secretId} = this.secretSettings.spotify;
+
+        if (!clientId || !secretId) {
+            new Notice("Secret Spotify Credentials NOT FOUND!");
+            return;
+        }
+
+        const sdk: SpotifyApi = SpotifyApi.withClientCredentials(clientId, secretId);
+
+        /////////////////////////////
 
         const ans: Artist = await sdk.artists.get(thisId);
         console.log(ans);

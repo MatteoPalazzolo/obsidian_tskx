@@ -103,7 +103,7 @@ If your plugin does not need CSS, delete this file.
 
 }
 
-.SpotifyImportModal {
+.ImportFromLinkModal {
     & .input-container {
         width: 100%;
         display: flex;
