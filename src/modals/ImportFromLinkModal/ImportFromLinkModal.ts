@@ -7,7 +7,7 @@ import { SpotifyAlbumLinkProcessor } from './LinkProcessorSubclasses/SpotifyAlbu
 
 export class ImportFromLinkModal extends Modal {
 
-    static SETTINGS: { [key: string]: LinkProcessorSettings } = {
+    static SETTINGS: { [key in "TRACK" | "ARTIST" | "ALBUM"]: LinkProcessorSettings } = {
         TRACK: {
             destinationFolder: "Analysis/Musica/Canzoni/",
             templateFilePath: "!Templates/Music Song Analysis Template.md"
@@ -87,34 +87,16 @@ export class ImportFromLinkModal extends Modal {
             const [, thisType, thisId] = match;
             switch (thisType) {
                 case "track":
-                    new SpotifyTrackLinkProcessor(
-                        this,
-                        ImportFromLinkModal.SETTINGS.TRACK,
-                        link,
-                        ansContainerEl,
-                        thisId,
-                        this.secretSettings
-                    ).processLink();
+                    new SpotifyTrackLinkProcessor( this, ImportFromLinkModal.SETTINGS.TRACK, link,
+                        ansContainerEl, thisId, this.secretSettings ).processLink();
                     return;
                 case "album":
-                    new SpotifyAlbumLinkProcessor(
-                        this,
-                        ImportFromLinkModal.SETTINGS.TRACK,
-                        link,
-                        ansContainerEl,
-                        thisId,
-                        this.secretSettings
-                    ).processLink();
+                    new SpotifyAlbumLinkProcessor( this, ImportFromLinkModal.SETTINGS.ALBUM, link, 
+                        ansContainerEl, thisId, this.secretSettings ).processLink();
                     return;
                 case "artist":
-                    new SpotifyArtistLinkProcessor(
-                        this,
-                        ImportFromLinkModal.SETTINGS.TRACK,
-                        link,
-                        ansContainerEl,
-                        thisId,
-                        this.secretSettings
-                    ).processLink();
+                    new SpotifyArtistLinkProcessor( this, ImportFromLinkModal.SETTINGS.ARTIST, link, 
+                        ansContainerEl, thisId, this.secretSettings ).processLink();
                     return;
                 default:
                     new Notice("Invalid Spotify URL");

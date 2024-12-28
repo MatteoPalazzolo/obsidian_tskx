@@ -25,7 +25,6 @@ export abstract class LinkProcessor<T> {
     }
 
     private isFilenameAvaliable(filename: string, path: string): boolean {
-        console.log(this.thisModal.app.vault.getFiles()[30]);
         return this.thisModal.app.vault.getFiles().filter(file => file.basename === filename && file.path.startsWith(path)).length === 0;
     }
 
@@ -33,7 +32,16 @@ export abstract class LinkProcessor<T> {
 
         this.ansContainerEl.empty();
 
-        const out = await this.getDataFromLink();
+        let out: { filename: string, data: T } | undefined;
+        
+        try {
+            out = await this.getDataFromLink();
+        }  catch (error) {
+            new Notice("ERROR: data fetching failed")
+            console.error("an error occurred while fetching data:", error);
+            return;
+        }
+
         if (!out) {
             return;
         }
@@ -87,12 +95,10 @@ export abstract class LinkProcessor<T> {
         const forbiddenCharsRegex = /[*"\/<>:|?]{1}/g;
         const newFilePath = this.settings.destinationFolder + filename.trim().replace(forbiddenCharsRegex, "_") + ".md";
 
-        const SONG_TEMPLATE_PATH = "!Templates/Music Album Analysis Template.md"
-
-        const file = this.thisModal.app.vault.getAbstractFileByPath(SONG_TEMPLATE_PATH);
+        const file = this.thisModal.app.vault.getAbstractFileByPath(this.settings.templateFilePath);
 
         if (!file || !(file instanceof TFile)) {
-            new Notice(SONG_TEMPLATE_PATH + " NOT FOUND!");
+            new Notice(this.settings.templateFilePath + " NOT FOUND!");
             return;
         }
         

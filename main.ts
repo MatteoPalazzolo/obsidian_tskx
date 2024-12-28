@@ -63,7 +63,6 @@ export default class extends Plugin {
                 const youtubeMatch = text.match(/(?:https|http):\/\/youtu.be\/(\w+)(?:$|\?)|(?:https|http):\/\/www.youtube.com\/embed\/(\w+)(?:$|\?)|(?:https|http):\/\/www.youtube.com\/watch\?v=(\w+)(?:$|&)/);
                 if (youtubeMatch) {
                     const [, thisId] = youtubeMatch.filter(id => id);
-                    console.log(thisId)
                     const iframe = document.createElement("iframe");
                     iframe.classList.add('youtube-iframe');
                     iframe.src = `https://www.youtube.com/embed/${thisId}`;

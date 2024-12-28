@@ -1,7 +1,7 @@
 import { Modal, Notice } from "obsidian";
 import { LinkProcessorSettings, SecretSettings } from "src/types";
 import { LinkProcessor } from "./LinkProcessor";
-import { SpotifyApi, Track } from "@spotify/web-api-ts-sdk";
+import { Track, SpotifyApi } from "@spotify/web-api-ts-sdk";
 import dayjs from "dayjs";
 
 interface NewSpotifyTrackData {

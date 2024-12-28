@@ -1,7 +1,7 @@
 import { Modal, Notice } from "obsidian";
 import { LinkProcessorSettings, SecretSettings } from "src/types";
 import { LinkProcessor } from "./LinkProcessor";
-import { SpotifyApi, Track } from "@spotify/web-api-ts-sdk";
+import { Album, SpotifyApi } from "@spotify/web-api-ts-sdk";
 import dayjs from "dayjs";
 
 interface NewSpotifyAlbumData {
@@ -37,7 +37,7 @@ export class SpotifyAlbumLinkProcessor extends LinkProcessor<NewSpotifyAlbumData
 
         const sdk: SpotifyApi = SpotifyApi.withClientCredentials(clientId, secretId);
 
-        const ans: Track = await sdk.tracks.get(this.uid);
+        const ans: Album = await sdk.albums.get(this.uid);
         // console.info(ans);
 
         const newData: NewSpotifyAlbumData = {
