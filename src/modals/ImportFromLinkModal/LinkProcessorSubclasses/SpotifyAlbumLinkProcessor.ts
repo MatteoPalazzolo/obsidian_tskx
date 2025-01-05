@@ -5,7 +5,8 @@ import { Album, SpotifyApi } from "@spotify/web-api-ts-sdk";
 import dayjs from "dayjs";
 
 interface NewSpotifyAlbumData {
-    name: string
+    name: string,
+    artists: string[]
 }
 
 export class SpotifyAlbumLinkProcessor extends LinkProcessor<NewSpotifyAlbumData> {
@@ -41,7 +42,8 @@ export class SpotifyAlbumLinkProcessor extends LinkProcessor<NewSpotifyAlbumData
         // console.info(ans);
 
         const newData: NewSpotifyAlbumData = {
-            name: ans.name
+            name: ans.name,
+            artists: ans.artists.map(a => a.name)
         };
         // console.info(newData);
 
@@ -53,7 +55,8 @@ export class SpotifyAlbumLinkProcessor extends LinkProcessor<NewSpotifyAlbumData
 
     formatData(data: NewSpotifyAlbumData): string[] {
         return [
-            "Name: " + data.name
+            "Name: " + data.name,
+            "Artist: " + data.artists.join(", ")
         ];
 
     }
@@ -62,6 +65,7 @@ export class SpotifyAlbumLinkProcessor extends LinkProcessor<NewSpotifyAlbumData
         return templateContent
             .replace("<% tp.date.now(\"YYYY-MM-DD\") %>", dayjs().format("YYYY-MM-DD"))
             .replace("{title}", data.name)
+            .replace("{author}", "\n  - " + data.artists.join("\n  - "))
             .replace("https://open.spotify.com/album/", `https://open.spotify.com/album/${this.uid}`);
 
     }

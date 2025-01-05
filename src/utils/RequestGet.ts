@@ -24,7 +24,7 @@ export async function requestGetText(url:string, params={}, headers={}) : Promis
     }
 }
 
-export async function requestGetJson(url:string, params={}, headers={}) : Promise<{}> {
+export async function requestGetJson(url:string, params={}, headers={}) : Promise<any> {
 
     console.info("requesting to", url + new URLSearchParams(params).toString());
 

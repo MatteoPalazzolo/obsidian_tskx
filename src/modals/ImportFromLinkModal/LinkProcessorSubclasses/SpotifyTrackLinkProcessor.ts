@@ -60,7 +60,7 @@ export class SpotifyTrackLinkProcessor extends LinkProcessor<NewSpotifyTrackData
     formatData(data: NewSpotifyTrackData): string[] {
         return [
             "Name: " + data.name,
-            "Artists: " + data.artists.join(", "),
+            "Artist: " + data.artists.join(", "),
             "Album: " + data.album,
             "Index: " + data.track_number
         ];
