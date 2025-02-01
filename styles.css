@@ -168,6 +168,63 @@ If your plugin does not need CSS, delete this file.
 
 }
 
+.GalleryCodeBlock {
+    width: 100%;
+    aspect-ratio: 16/9;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 20px;
+    background-color: var(--tab-container-background);
+
+    & .gallery {
+        height: 100%;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position-x: center;
+        aspect-ratio: 16/9;
+        transition: background .1s;
+    }
+
+    & .arrow-container {
+        z-index: 5;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 5%;
+
+        background-color: black;
+        opacity: 0;
+        transition: opacity .1s;
+        cursor: pointer;
+
+        .GalleryCodeBlock:hover & {
+            opacity: .3;
+        }
+
+        &:hover {
+            opacity: .6 !important;
+        }
+
+        &:active {
+            opacity: .3 !important;
+        }
+    
+        &.left  { left: 0; }
+        &.right { right: 0; }
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        /* in modo che venga erreditato dalle frecce */
+        font-size: 70px;
+        user-select: none;
+
+    }
+
+}
+
 .spotify-iframe {
     &.track {
         width: 100%;
