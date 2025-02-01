@@ -188,6 +188,28 @@ If your plugin does not need CSS, delete this file.
 }
 
 .steam-iframe {
+    width: 100%;
+    max-width: 646px;
+    height: 190px;
+}
+
+.itchio-iframe {
+    width: 100%;
+    max-width: 646px;
+    height: 167px;
+}
+
+.steam-itchio-iframe-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    
+    & > iframe {
+        flex: 1 1 400px;
+    }
+}
+
+/*.steam-iframe {
     width: 646px;
     height: 190px;
 }
@@ -205,6 +227,9 @@ If your plugin does not need CSS, delete this file.
     & > iframe {
         flex: 1;
         min-width: 500px;
-        max-width: 646px;
     }
-}
+
+    @container(max-width: 500px) {
+
+    }
+}*/
