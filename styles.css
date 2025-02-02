@@ -218,7 +218,7 @@ If your plugin does not need CSS, delete this file.
         justify-content: center;
 
         /* in modo che venga erreditato dalle frecce */
-        font-size: 70px;
+        font-size: 4vw;
         user-select: none;
 
     }

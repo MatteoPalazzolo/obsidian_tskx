@@ -1,10 +1,9 @@
-import { Plugin, Notice, FileSystemAdapter, TFile } from 'obsidian';
+import { Plugin, Notice } from 'obsidian';
 import { BannerSearchModal } from 'src/modals/BannerSearchModal';
 import { GitPushModal } from 'src/modals/GitPushModal';
 import { DefaultScannerModal } from 'src/modals/DefaultScannerModal';
 import { ImportFromLinkModal } from 'src/modals/ImportFromLinkModal/ImportFromLinkModal';
 import { SecretSettings } from 'src/types';
-import { requestGetJson } from 'src/utils/RequestGet';
 import { registerCodeBlockProcessor } from 'src/widgets/GalleryCodeBlock';
 import { registerIframeMarkdownPostProcessor } from 'src/widgets/IframePostProcessor';
 
@@ -21,7 +20,7 @@ export default class extends Plugin {
         this.addRibbonIcon('image-plus', 'Search Banner', (evt: MouseEvent) => new BannerSearchModal(this.app).open());
         this.addRibbonIcon('scan-eye', 'Default Banner Scan', (evt: MouseEvent) => new DefaultScannerModal(this.app).open());
         this.addRibbonIcon('github', 'Git Push', (evt: MouseEvent) => new GitPushModal(this.app).open());
-        this.addRibbonIcon('disc-3', 'Add Current Song', (evt: MouseEvent) => new ImportFromLinkModal(this.app, this.secretSettings).open());
+        this.addRibbonIcon('disc-3', 'Import From Link', (evt: MouseEvent) => new ImportFromLinkModal(this.app, this.secretSettings).open());
 
         registerIframeMarkdownPostProcessor.call(this);
         registerCodeBlockProcessor.call(this);
