@@ -12,7 +12,7 @@ export class OldBannerSearchModal extends Modal {
 
     HEADER_REGEX = /!\[header\]\((.*?)\)/;
     MEDIA_REGEX = /(?<=Analysis\/)[^/]+(?=\/)/;
-    MEDIA_TO_SCRAPER: { [key: string]: ((name: string) => Promise<string[][]>)[] } = {
+    MEDIA_TO_SCRAPER: { [key: string]: ((name: string) => AsyncGenerator<string>)[] } = {
         All: [
             fetchSteamBanner,
             fetchItchioBanner,
@@ -61,8 +61,8 @@ export class OldBannerSearchModal extends Modal {
         setIcon(searchButtonEl, 'search');
 
         const checkboxDiv = contentEl.createDiv({ cls: 'my-checkbox-container' });
-        checkboxDiv.createEl('label', { cls: 'mod-checkbox', text: "replace current header image" });
-        this.checkboxEl = checkboxDiv.createEl('input', { type: 'checkbox' });
+        checkboxDiv.createEl('label', { cls: 'mod-checkbox', text: "replace current header image", attr: { for: "replace-current-header-image" } });
+        checkboxDiv.createEl('input', { type: 'checkbox', attr: { id: "replace-current-header-image" } });
 
         contentEl.createEl('hr');
 
@@ -126,24 +126,14 @@ export class OldBannerSearchModal extends Modal {
             return
         }
 
-        const bannerList = [];
         for (const func of this.MEDIA_TO_SCRAPER[mediaType] ?? this.MEDIA_TO_SCRAPER["All"]) {
-            const links = await func(name);
-            bannerList.push(...links);
-        }
-        
-        console.info("bannerList", bannerList.flat());
 
-        if (bannerList.length === 0) {
-            parent.createSpan({ text: "no image found", cls: 'no-img-found' });
-            return;
-        }
+            for await (const url of func(name)) {
+                if (url === "line") {
+                    parent.createEl('hr');
+                    continue;
+                }
 
-        for (let urlPack of bannerList) {
-            if (urlPack.length === 0) {
-                continue;
-            }
-            for (let url of urlPack) {
                 const img = parent.createEl('img', { attr: { src: url }, cls: 'click' });
                 img.addEventListener("click", (evt: MouseEvent) => {
                     const imgSrc = (evt.currentTarget as HTMLImageElement).src;
@@ -153,9 +143,11 @@ export class OldBannerSearchModal extends Modal {
                         this.copyToClipboard(imgSrc);
                     }
                 });
+
             }
-            parent.createEl('hr');
+
         }
+
     }
 
     private async replaceBannerImage(imgSrc: string) {

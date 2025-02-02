@@ -1,13 +1,13 @@
 import { requestGetText } from "src/utils/requestGet";
 
-export async function fetchSteamBanner(name: string): Promise<string[][]> {
+export async function* fetchSteamBanner(q: string): AsyncGenerator<string> {
     // 1) steam impedisce di accedere alle pagine +18 senza un account --> 
     //    questa funzione non ritorna le immagini di quel tipo di giochi
 
     // STEP 1 : richiesta alla funzione di search
     const url = "https://store.steampowered.com/search?";
     const params = {
-        term: name,
+        term: q,
         ignore_preferences: "1",
         ndl: "1",
     };
@@ -20,10 +20,9 @@ export async function fetchSteamBanner(name: string): Promise<string[][]> {
     console.groupCollapsed(idLinks.length)
     console.log(htmlText);
     console.log(idLinks);
-    console.groupEnd()
+    console.groupEnd();
 
-    const imagesRegex = /href="[^"]*(https:\/\/shared.fastly.steamstatic.com\/store_item_assets\/steam\/apps\/[^"]*.jpg)[^"]*"/g;
-    const imagesLinks: string[][] = [];
+    const imagesRegex = /href="[^"]*(https:\/\/shared.cloudflare.steamstatic.com\/store_item_assets\/steam\/apps\/[^"]*.jpg)[^"]*"/g;
 
     for (let idLink of idLinks) {
         const imagesHtml = await requestGetText(idLink);
@@ -34,18 +33,21 @@ export async function fetchSteamBanner(name: string): Promise<string[][]> {
         console.log(imageLinks);
         console.groupEnd()
 
-        imagesLinks.push(imageLinks);
-    }
+        for (const imgUrl of imageLinks) {
+            yield imgUrl;
+        }
+        yield "line";
 
-    return imagesLinks;
+    }
+    
 }
 
-export async function fetchItchioBanner(name: string): Promise<string[][]> {
+export async function* fetchItchioBanner(q: string): AsyncGenerator<string> {
     
     // STEP 1 : richiesta alla funzione di search
     const url = "https://itch.io/search?";
     const params = {
-        q: name
+        q: q
     };
     const textHtml = await requestGetText(url, params);
 
@@ -59,7 +61,6 @@ export async function fetchItchioBanner(name: string): Promise<string[][]> {
     console.groupEnd()
 
     const imagesRegex = /<a[^>]*?href="(https:\/\/img\.itch\.zone\/[^"]*)"[^>]*?target="_blank"|<a[^>]*?target="_blank"[^>]*?href="(https:\/\/img\.itch\.zone\/[^"]*)"/g;;
-    const imagesLinks: string[][] = [];
 
     for (let idLink of idLinks) {
         const imagesHtml = await requestGetText(idLink);
@@ -70,19 +71,20 @@ export async function fetchItchioBanner(name: string): Promise<string[][]> {
         console.log(imageLinks);
         console.groupEnd()
         
-        imagesLinks.push(imageLinks);
+        for (const imgUrl of imageLinks) {
+            yield imgUrl;
+        }
+        yield "line";
     }
-
-    return imagesLinks;
 
 }
 
-export async function fetchTMDbBanner(name: string): Promise<string[][]> {
+export async function* fetchTMDbBanner(q: string): AsyncGenerator<string> {
     
     // STEP 1 : richiesta alla funzione di search
     const url = "https://www.themoviedb.org";
     const params = {
-        query: name
+        query: q
     };
     const linkHtml = await requestGetText(url + "/search?", params);
 
@@ -92,14 +94,15 @@ export async function fetchTMDbBanner(name: string): Promise<string[][]> {
     const mediaLinks = Array.from(linkHtml.matchAll(linkRegex), match => url + match[1] + "/images/backdrops").slice(0,5);
     
     const imagesRegex = /class="card compact ok"[\s\S]*?href="(.+?)"/g;
-    const imagesLinks: string[][] = [];
 
     for (let mediaLink of mediaLinks) {
         const imagesHtml = await requestGetText(mediaLink);
         const imageLinks = Array.from(imagesHtml.matchAll(imagesRegex), match => match[1]);
-        imagesLinks.push(imageLinks);
+        
+        for (const imgUrl of imageLinks) {
+            yield imgUrl;
+        }
+        yield "line";
     }
-
-    return imagesLinks;
 
 }
