@@ -7,9 +7,9 @@ export function registerCodeBlockProcessor(this: Plugin) {
         const imageUrlList = source.split('\n')
             .map((line) => line.trim())
             .filter((line) => line);
-
-        // Create Gallery Container                
-        const galleryContainerEl = el.createEl("div", { cls: 'GalleryCodeBlock' });
+        
+        el.classList.add('GalleryCodeBlock')
+        const galleryContainerEl = el;
         
         // Create Gallery
         const galleryEl = galleryContainerEl.createEl('div', { cls: 'gallery' });

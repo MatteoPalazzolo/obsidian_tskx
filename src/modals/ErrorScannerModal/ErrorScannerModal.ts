@@ -1,6 +1,6 @@
 import { App, Modal, TFile } from 'obsidian';
 
-export class DefaultScannerModal extends Modal {
+export class ErrorScannerModal extends Modal {
     constructor(app: App) {
         super(app);
     }

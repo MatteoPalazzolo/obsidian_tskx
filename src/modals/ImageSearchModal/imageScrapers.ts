@@ -1,4 +1,4 @@
-import { requestGetText, requestGetJson } from './RequestGet';
+import { requestGetText } from "src/utils/requestGet";
 
 export async function fetchSteamBanner(name: string): Promise<string[][]> {
     // 1) steam impedisce di accedere alle pagine +18 senza un account --> 

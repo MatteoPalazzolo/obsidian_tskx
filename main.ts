@@ -1,11 +1,13 @@
 import { Plugin, Notice } from 'obsidian';
-import { BannerSearchModal } from 'src/modals/BannerSearchModal';
-import { GitPushModal } from 'src/modals/GitPushModal';
-import { DefaultScannerModal } from 'src/modals/DefaultScannerModal';
-import { ImportFromLinkModal } from 'src/modals/ImportFromLinkModal/ImportFromLinkModal';
+import { OldBannerSearchModal }    from 'src/Modals/OldBannerSearchModal/OldBannerSearchModal';
+import { ImageSearchModal }    from 'src/Modals/ImageSearchModal/ImageSearchModal';
+import { GitPushModal }         from 'src/Modals/GitPushModal/GitPushModal';
+import { ErrorScannerModal }  from 'src/Modals/ErrorScannerModal/ErrorScannerModal';
+import { ImportFromLinkModal }  from 'src/Modals/ImportFromLinkModal/ImportFromLinkModal';
+import { registerCodeBlockProcessor }           from 'src/Widgets/GalleryCodeBlock';
+import { registerIframeMarkdownPostProcessor }  from 'src/Widgets/IframePostProcessor';
 import { SecretSettings } from 'src/types';
-import { registerCodeBlockProcessor } from 'src/widgets/GalleryCodeBlock';
-import { registerIframeMarkdownPostProcessor } from 'src/widgets/IframePostProcessor';
+import { SECRET_SETTINGS_FILENAME } from 'src/conts';
 
 
 export default class extends Plugin {
@@ -17,10 +19,11 @@ export default class extends Plugin {
 
         await this.loadSecretSettings();
 
-        this.addRibbonIcon('image-plus', 'Search Banner', (evt: MouseEvent) => new BannerSearchModal(this.app).open());
-        this.addRibbonIcon('scan-eye', 'Default Banner Scan', (evt: MouseEvent) => new DefaultScannerModal(this.app).open());
-        this.addRibbonIcon('github', 'Git Push', (evt: MouseEvent) => new GitPushModal(this.app).open());
-        this.addRibbonIcon('disc-3', 'Import From Link', (evt: MouseEvent) => new ImportFromLinkModal(this.app, this.secretSettings).open());
+        this.addRibbonIcon('disc-3'     , 'Import From Link', (evt: MouseEvent) => new ImportFromLinkModal(this.app, this.secretSettings).open());
+        this.addRibbonIcon('image-plus' , 'Image Search', (evt: MouseEvent) => new ImageSearchModal(this.app).open());
+        this.addRibbonIcon('trash-2'    , 'Old Banner Search', (evt: MouseEvent) => new OldBannerSearchModal(this.app).open());
+        this.addRibbonIcon('scan-eye'   , 'Error Scan', (evt: MouseEvent) => new ErrorScannerModal(this.app).open());
+        this.addRibbonIcon('github'     , 'Git Push', (evt: MouseEvent) => new GitPushModal(this.app).open());
 
         registerIframeMarkdownPostProcessor.call(this);
         registerCodeBlockProcessor.call(this);
@@ -32,7 +35,7 @@ export default class extends Plugin {
     }
 
     private async loadSecretSettings() {
-        const secretSettingsFilePath = (this.manifest.dir ?? "") + "/secret-settings.json";
+        const secretSettingsFilePath = (this.manifest.dir ?? "") + "/" + SECRET_SETTINGS_FILENAME;
         const data = await this.app.vault.adapter.read(secretSettingsFilePath);
 
         if (data) {

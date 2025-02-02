@@ -1,4 +1,4 @@
-import { requestUrl, RequestUrlResponse } from 'obsidian';
+import { requestUrl } from 'obsidian';
 
 export async function requestGetText(url:string, params={}, headers={}) : Promise<string> {
 

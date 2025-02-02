@@ -1,5 +1,5 @@
 import { Plugin } from "obsidian";
-import { requestGetJson } from "src/utils/RequestGet";
+import { requestGetJson } from "src/utils/requestGet";
 
 // TODO: al momento funziona bene, ma il layout non è molto flessibile e non è estendibile, modificare all'occorrenza
 export function registerIframeMarkdownPostProcessor(this: Plugin) {

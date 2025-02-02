@@ -3,9 +3,9 @@ import {
     fetchSteamBanner,
     fetchItchioBanner,
     fetchTMDbBanner
-} from '../utils/FetchBanner';
+} from './fetchBanner';
 
-export class BannerSearchModal extends Modal {
+export class OldBannerSearchModal extends Modal {
     constructor(app: App) {
         super(app);
     }
