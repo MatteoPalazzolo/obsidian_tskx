@@ -14,12 +14,18 @@ export function registerCodeBlockProcessor(this: Plugin) {
         // Create Gallery
         const galleryEl = galleryContainerEl.createEl('div', { cls: 'gallery' });
 
+        // se non ci sono immagini rendi lo sfondo grigio
         if (imageUrlList.length === 0) {
             galleryEl.style.backgroundColor = "var(--tab-container-background)";
             return;
         }
 
         galleryEl.style.backgroundImage = "url(" + imageUrlList[activeSlide] + ")";
+
+        // se c'è una sola immagine non renderizzare le frecce
+        if (imageUrlList.length === 1) {
+            return;
+        }
 
         // Create Left Arrow
         const leftArrowContainerEl = galleryContainerEl.createDiv({ cls: 'arrow-container left' });

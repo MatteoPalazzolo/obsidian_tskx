@@ -62,7 +62,7 @@ export class OldBannerSearchModal extends Modal {
 
         const checkboxDiv = contentEl.createDiv({ cls: 'my-checkbox-container' });
         checkboxDiv.createEl('label', { cls: 'mod-checkbox', text: "replace current header image", attr: { for: "replace-current-header-image" } });
-        checkboxDiv.createEl('input', { type: 'checkbox', attr: { id: "replace-current-header-image" } });
+        this.checkboxEl = checkboxDiv.createEl('input', { type: 'checkbox', attr: { id: "replace-current-header-image" } });
 
         contentEl.createEl('hr');
 

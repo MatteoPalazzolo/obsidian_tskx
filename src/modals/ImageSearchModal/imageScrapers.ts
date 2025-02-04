@@ -36,7 +36,7 @@ export async function* fetchSteamBanner(q: string): AsyncGenerator<string> {
         for (const imgUrl of imageLinks) {
             yield imgUrl;
         }
-        yield "line";
+        yield 'line';
 
     }
     
@@ -74,7 +74,7 @@ export async function* fetchItchioBanner(q: string): AsyncGenerator<string> {
         for (const imgUrl of imageLinks) {
             yield imgUrl;
         }
-        yield "line";
+        yield 'line';
     }
 
 }
@@ -102,7 +102,7 @@ export async function* fetchTMDbBanner(q: string): AsyncGenerator<string> {
         for (const imgUrl of imageLinks) {
             yield imgUrl;
         }
-        yield "line";
+        yield 'line';
     }
 
 }

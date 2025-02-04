@@ -78,6 +78,82 @@ If your plugin does not need CSS, delete this file.
 
 }
 
+
+.ImageSearchModal {
+
+    .modal:has(&) {
+        min-width: 80%;
+    }
+
+    & .input-container {
+        width: 100%;
+        display: flex;
+        gap: 5px;
+        justify-content: space-around;
+        margin-bottom: 10px;
+
+        & input {
+            flex: 10;
+        }
+        & select {
+            flex: 5;
+        }
+        & span {
+            flex: 1;
+        }        
+    }
+
+    & .my-checkbox-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+    }
+
+    & hr {
+        margin-top: 10px;
+        margin-bottom: 16px;
+    }
+
+    & .images-container {
+        width: 100%;
+        columns: 300px;
+        
+        /*
+        display: flex;
+        flex-flow: column;
+        align-items: center;
+        */
+
+        & .no-img-found {
+
+        }
+        
+        & img.click {
+            width: 100%;
+            margin-bottom: 4px;
+            border: 2px var(--hr-color) solid;
+            border-radius: 5px;
+        
+            &:hover {
+                opacity: .8;
+                border: 2px red solid;
+            }
+    
+            &:active {
+                opacity: 1;
+                border: 2px green solid;
+            }
+    
+        }
+
+        & > hr {
+            width: 100%;
+        }
+    }
+
+}
+
 .DefaultScannerModal {
     & .section-header {
         margin-bottom: 5px;
@@ -265,28 +341,3 @@ If your plugin does not need CSS, delete this file.
         flex: 1 1 400px;
     }
 }
-
-/*.steam-iframe {
-    width: 646px;
-    height: 190px;
-}
-
-.itchio-iframe {
-    width: 646px;
-    height: 167px;
-}
-
-.steam-itchio-iframe-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    
-    & > iframe {
-        flex: 1;
-        min-width: 500px;
-    }
-
-    @container(max-width: 500px) {
-
-    }
-}*/
