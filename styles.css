@@ -118,6 +118,7 @@ If your plugin does not need CSS, delete this file.
     & .images-container {
         width: 100%;
         columns: 300px;
+        gap: 10px;
         
         /*
         display: flex;
@@ -125,31 +126,40 @@ If your plugin does not need CSS, delete this file.
         align-items: center;
         */
 
-        & .no-img-found {
-
-        }
-        
-        & img.click {
+        & .empty-selection {
+            /*
+            display: block;
             width: 100%;
-            margin-bottom: 4px;
-            border: 2px var(--hr-color) solid;
-            border-radius: 5px;
-        
-            &:hover {
-                opacity: .8;
-                border: 2px red solid;
-            }
-    
-            &:active {
-                opacity: 1;
-                border: 2px green solid;
-            }
-    
+            text-align: center;
+            */
         }
 
         & > hr {
             width: 100%;
         }
+
+        & .my-image-checkbox-div {
+            position: relative;
+            margin-bottom: 5px;
+
+            & > label {
+                display: block;
+                height: 100%;
+
+                & > img {
+                    margin: auto;
+                    width: 100%;
+                }
+            }
+
+            & > input[type="checkbox"] {
+                position: absolute;
+                right: 5px;
+                bottom: 10px;
+            }
+
+        }
+
     }
 
 }

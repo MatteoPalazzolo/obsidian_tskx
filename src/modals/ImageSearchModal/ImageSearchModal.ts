@@ -29,6 +29,7 @@ const CATEGORY_TO_SCRAPERS: Record<MediaCategory, ScraperName[]> = {
 export class ImageSearchModal extends Modal {
     
     activeScrapers: Record<ScraperName, boolean>;
+    imgContainerEl: HTMLDivElement;
 
     constructor(app: App) {
         super(app);
@@ -45,7 +46,7 @@ export class ImageSearchModal extends Modal {
         const searchBarDivEl = contentEl.createDiv({ cls: 'input-container' });
 
         const inputEl = searchBarDivEl.createEl('input', {
-            type: 'text', cls: 'text-input-class', placeholder: 'game to search for...'
+            type: 'text', cls: 'text-input-class', placeholder: 'query'
         });
 
         const searchButtonEl = searchBarDivEl.createSpan({ cls: 'clickable-icon' });
@@ -82,22 +83,22 @@ export class ImageSearchModal extends Modal {
 
         contentEl.createEl('hr');
 
-        const imgContainerEl = contentEl.createDiv({ cls: 'images-container' });
+        this.imgContainerEl = contentEl.createDiv({ cls: 'images-container' });
 
         //CSS column: 300px
         
-        this.searchAndLoadImages(imgContainerEl, fileName);
+        this.searchAndLoadImages(fileName);
 
         // search on keydown
         inputEl.addEventListener('keydown', evt => {
             if (evt.key === "Enter") {
-                this.searchAndLoadImages(imgContainerEl, inputEl.value);
+                this.searchAndLoadImages(inputEl.value);
             }
         });
 
         // search on button click
         searchButtonEl.addEventListener('click', (evt: MouseEvent) =>
-            this.searchAndLoadImages(imgContainerEl, inputEl.value)
+            this.searchAndLoadImages(inputEl.value)
         );
         
     }
@@ -108,34 +109,56 @@ export class ImageSearchModal extends Modal {
     }
 
 
-    private async searchAndLoadImages(container: HTMLElement, query: string) {
-        container.empty();
+    private async searchAndLoadImages(query: string) {
+        this.imgContainerEl.empty();
 
+        let id = 0;
         const activeScrapersList = Object.keys(this.activeScrapers).filter((v: ScraperName) => this.activeScrapers[v] == true);
+
+        if (activeScrapersList.length === 0) {
+            this.imgContainerEl.createSpan({ cls: 'empty-selection', text: 'There are no active scrapers!'});
+            // new Notice("WARNING: no active scraper was found!");
+            return;
+        }
+
         for (const scraper of activeScrapersList) {
             for await (const url of SCRAPERS[scraper as ScraperName](query)) {
                 if (url === 'line') {
-                    container.createEl('hr');
-                    continue;
-                }
-
-                const img = container.createEl('img', { attr: { src: url }, cls: 'click' });
-                img.addEventListener("mousedown", (evt: MouseEvent) => {
-                    const imgSrc = (evt.currentTarget as HTMLImageElement).src;
-                    if (evt.button === 0 /* left  mouse button */) {
-                        //TODO: concludere il sistema di selezione delle immagini e di aggiornamento della galleria
-                    } else if (evt.button === 2 /* right mouse button */) {
-                        copyToClipboard(imgSrc);
-                    }
-
-                });
+                    this.imgContainerEl.createEl('hr');
+                } else {
+                    this.createImageCheckbox(url, id);
+                    id += 1;
+                }                
 
             }
 
         }
 
+        if (id === 0) {
+            this.imgContainerEl.createSpan({ cls: 'empty-selection', text: 'No image found!'});
+            // new Notice("WARNING: no image found!");
+        }
+
     }
 
+
+    private createImageCheckbox(url: string, id: number) {
+        // aggiungere un input checkbox e mettere l'immagine in una label legata all'input
+        const div = this.imgContainerEl.createDiv({ attr: { src: url }, cls: 'my-image-checkbox-div' });
+            const label = div.createEl('label', { attr: { for: 'my-checkbox-' + id }  });
+                const img = label.createEl('img', { attr: { src: url }  });
+            const checkbox = div.createEl('input', { attr: { id: 'my-checkbox-' + id }, type: 'checkbox' })
+        
+        img.addEventListener("mousedown", (evt: MouseEvent) => {
+            const imgSrc = (evt.currentTarget as HTMLImageElement).src;
+            if (evt.button === 0 /* left  mouse button */) {
+                //TODO: concludere il sistema di selezione delle immagini e di aggiornamento della galleria
+            } else if (evt.button === 2 /* right mouse button */) {
+                copyToClipboard(imgSrc);
+            }
+
+        });
+    }
 
     private getCurrentFileInfo(): { fileName: string, fileCategory: MediaCategory | "" } {
         const currentFile = this.app.workspace.getActiveFile();
