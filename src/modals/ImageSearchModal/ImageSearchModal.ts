@@ -29,13 +29,16 @@ const CATEGORY_TO_SCRAPERS: Record<MediaCategory, ScraperName[]> = {
 export class ImageSearchModal extends Modal {
     
     activeScrapers: Record<ScraperName, boolean>;
-    imgContainerEl: HTMLDivElement;
+    selectedImages: string[];
+
+    private imgContainerEl: HTMLDivElement;
 
     constructor(app: App) {
         super(app);
         
         // genera dinamicamente un dizionario che associa ad ogni nome di scraper un valore booleano
         this.activeScrapers = Object.fromEntries(Object.keys(SCRAPERS).map((k) => [k, false])) as Record<ScraperName, boolean>;
+        this.selectedImages = [];
     }
 
     async onOpen() {
@@ -51,6 +54,8 @@ export class ImageSearchModal extends Modal {
 
         const searchButtonEl = searchBarDivEl.createSpan({ cls: 'clickable-icon' });
         setIcon(searchButtonEl, 'search');
+        const commitButtonEl = searchBarDivEl.createSpan({ cls: 'clickable-icon' });
+        setIcon(commitButtonEl, 'send');
 
         const checkboxDiv = contentEl.createDiv({ cls: 'my-checkbox-container' });
 
@@ -90,16 +95,19 @@ export class ImageSearchModal extends Modal {
         this.searchAndLoadImages(fileName);
 
         // search on keydown
-        inputEl.addEventListener('keydown', evt => {
+        inputEl.onkeydown = (evt) => {
             if (evt.key === "Enter") {
                 this.searchAndLoadImages(inputEl.value);
             }
-        });
+        };
 
         // search on button click
-        searchButtonEl.addEventListener('click', (evt: MouseEvent) =>
-            this.searchAndLoadImages(inputEl.value)
-        );
+        searchButtonEl.onclick = (evt: MouseEvent) =>
+            this.searchAndLoadImages(inputEl.value);
+
+        // commit image selection to the first gallery in the page on click
+        commitButtonEl.onclick = (evt: MouseEvent) =>
+            this.commitSelectionToGallery();
         
     }
     
@@ -147,18 +155,41 @@ export class ImageSearchModal extends Modal {
         const div = this.imgContainerEl.createDiv({ attr: { src: url }, cls: 'my-image-checkbox-div' });
             const label = div.createEl('label', { attr: { for: 'my-checkbox-' + id }  });
                 const img = label.createEl('img', { attr: { src: url }  });
-            const checkbox = div.createEl('input', { attr: { id: 'my-checkbox-' + id }, type: 'checkbox' })
+            const checkbox = div.createEl('input', { attr: { id: 'my-checkbox-' + id, 'data-url': url }, type: 'checkbox' })
         
-        img.addEventListener("mousedown", (evt: MouseEvent) => {
+        img.onmousedown = (evt: MouseEvent) => {
             const imgSrc = (evt.currentTarget as HTMLImageElement).src;
-            if (evt.button === 0 /* left  mouse button */) {
-                //TODO: concludere il sistema di selezione delle immagini e di aggiornamento della galleria
-            } else if (evt.button === 2 /* right mouse button */) {
+            if (evt.button === 2 /* right mouse button */) {
                 copyToClipboard(imgSrc);
             }
+        };
 
-        });
+        checkbox.oninput = (evt: InputEvent) => {
+            const url = checkbox.getAttribute('data-url') ?? "";
+            if (checkbox.checked) {
+                this.selectedImages.push(url);
+            } else {
+                const i = this.selectedImages.indexOf(url);
+                this.selectedImages.splice(i, 1);    
+            }
+        }
+
     }
+
+
+    private async commitSelectionToGallery() {
+        const newGallery = '\n' + '```gallery' + '\n' + this.selectedImages.join('\n') + '\n' + '```';
+        const activeFile = this.app.workspace.getActiveFile();
+        console.log(activeFile);
+        if (!activeFile) {
+            new Notice("WARNING: No active file was found!");
+            return;
+        }
+        const currentContent = await this.app.vault.read(activeFile);
+        console.log(currentContent);
+        await this.app.vault.modify(activeFile, currentContent + newGallery);
+    }
+
 
     private getCurrentFileInfo(): { fileName: string, fileCategory: MediaCategory | "" } {
         const currentFile = this.app.workspace.getActiveFile();
@@ -177,3 +208,12 @@ export class ImageSearchModal extends Modal {
     }
     
 }
+
+//TODO: aggiungi i link già presenti in quella galleria come opzioni, ma con la checkbox già spuntata e già inserite nella lista di link di default
+//TODO: fai in modo che riconosca la presenza di una galleria con una regex e che sostituisca quella nuova a quella già presente
+//TODO: se non esiste nessuna galleria prova a cercare un ![header](...), prendi l'immagine e aggiungila in cima alla lista della selezione
+
+//TODO: trovare il modo di far vedere l'ordine di selezione nel modale con le checkbox
+//TODO: se arrivo fino a quì sarebbe il caso di aggiungere anche un indicatore del numero dell'immagine nella galleria
+
+//TODO: inserire un button direttamente sulla galleria che apra il modulo per editarla, in modo da poter avere più di una galleria per file
