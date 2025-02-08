@@ -1,8 +1,11 @@
-import { Plugin } from "obsidian";
+import { Plugin, setIcon } from "obsidian";
+import { ImageSearchModal } from "src/Modals/ImageSearchModal/ImageSearchModal";
 
 export function registerCodeBlockProcessor(this: Plugin) {
     this.registerMarkdownCodeBlockProcessor("gallery", async (source, el, ctx) => {
         let activeSlide = 0;
+
+        console.log(source)
 
         const imageUrlList = source.split('\n')
             .map((line) => line.trim())
@@ -14,14 +17,19 @@ export function registerCodeBlockProcessor(this: Plugin) {
         // Create Gallery
         const galleryEl = galleryContainerEl.createEl('div', { cls: 'gallery' });
 
+        // Create Button per editare la galleria con ImageSearchModal
+        const editGalleryButtonEl = galleryContainerEl.createSpan({ cls: 'edit-content-button clickable-icon' });
+        setIcon(editGalleryButtonEl, 'pencil');
+        editGalleryButtonEl.onclick = (evt: MouseEvent) => new ImageSearchModal(this.app, '```gallery\n' + source + '\n```').open()
+        
         // se non ci sono immagini rendi lo sfondo grigio
         if (imageUrlList.length === 0) {
             galleryEl.style.backgroundColor = "var(--tab-container-background)";
             return;
         }
-
+        
         galleryEl.style.backgroundImage = "url(\"" + imageUrlList[activeSlide] + "\")";
-
+        
         // se c'è una sola immagine non renderizzare le frecce
         if (imageUrlList.length === 1) {
             return;

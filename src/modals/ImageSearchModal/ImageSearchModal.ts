@@ -1,4 +1,4 @@
-import { App, Modal, Notice, setIcon } from "obsidian";
+import { App, Modal, Notice, setIcon, TFile } from "obsidian";
 import {
     fetchSteamBanner,
     fetchItchioBanner,
@@ -7,18 +7,21 @@ import {
 import { ANALYSIS_FOLDER_NAME } from "src/conts";
 import { copyToClipboard } from "src/utils/clipboard";
 
-
+//TOEDIT: da modificare per aggiungere scrapers
 type ScraperName = "steam" | "itchio" | "tmdb";
 type ScraperGenerator = (q: string) => AsyncGenerator<string>;
 
+//TOEDIT: da modificare per aggiungere scrapers
 const SCRAPERS: Record<ScraperName, ScraperGenerator> = {
     "steam": fetchSteamBanner,
     "itchio": fetchItchioBanner,
     "tmdb": fetchTMDbBanner
 }
 
+//TOEDIT: da modificare per assegnare cartelle a scraper
 type MediaCategory = "Videogames" | "Shows" | "Movies";
 
+//TOEDIT: da modificare per assegnare cartelle a scraper
 const CATEGORY_TO_SCRAPERS: Record<MediaCategory, ScraperName[]> = {
     "Videogames": ["steam", "itchio"],
     "Shows": ["tmdb"],
@@ -30,9 +33,11 @@ export class ImageSearchModal extends Modal {
 
     public  targetGalleryRaw: string;
     public  targetGalleryContent: string[];
+    public  fromGalleryButton: boolean;
     private activeScrapers: Record<ScraperName, boolean>;
     private selectedImages: string[];
     private imgContainerEl: HTMLDivElement;
+    private activeFile: TFile | null;
 
     constructor(app: App, targetGalleryRaw = "") {
         super(app);
@@ -40,7 +45,9 @@ export class ImageSearchModal extends Modal {
         this.activeScrapers = Object.fromEntries(Object.keys(SCRAPERS).map((k) => [k, false])) as Record<ScraperName, boolean>;
         this.selectedImages = [];
         this.targetGalleryRaw = targetGalleryRaw;
-        this.targetGalleryContent = [];
+        this.targetGalleryContent = this.galleryRawToContent(targetGalleryRaw)[1];
+        this.activeFile = this.app.workspace.getActiveFile();
+        this.fromGalleryButton = targetGalleryRaw !== "";
     }
 
     async onOpen() {
@@ -50,10 +57,6 @@ export class ImageSearchModal extends Modal {
 
         if (this.targetGalleryRaw === "") {
             [this.targetGalleryRaw, this.targetGalleryContent] = await this.getFirstGalleryInCurrentFile();
-        }
-        if (this.targetGalleryRaw === "") {
-            new Notice("WARNING: no active gallery was found!");
-            return;
         }
 
         const searchBarDivEl = contentEl.createDiv({ cls: 'input-container' });
@@ -65,7 +68,11 @@ export class ImageSearchModal extends Modal {
         const searchButtonEl = searchBarDivEl.createSpan({ cls: 'clickable-icon' });
         setIcon(searchButtonEl, 'search');
         const commitButtonEl = searchBarDivEl.createSpan({ cls: 'clickable-icon' });
-        setIcon(commitButtonEl, 'send');
+        if (!this.activeFile || this.targetGalleryRaw === "") {
+            setIcon(commitButtonEl, 'clipboard');
+        } else {
+            setIcon(commitButtonEl, 'pencil');
+        }
 
         const checkboxDiv = contentEl.createDiv({ cls: 'my-checkbox-container' });
 
@@ -73,7 +80,7 @@ export class ImageSearchModal extends Modal {
         const { fileName, fileCategory } = this.getCurrentFileInfo();
 
         // Autofill query with fileName
-        if (fileName) {
+        if (fileName && !this.fromGalleryButton) {
             inputEl.value = fileName;
         } else {
             // new Notice(`Target filename not detected.`);
@@ -87,7 +94,8 @@ export class ImageSearchModal extends Modal {
                 this.activeScrapers[scraperName] = (e.currentTarget as HTMLInputElement).checked;
             }
             if (
-                fileCategory && 
+                fileCategory &&
+                !this.fromGalleryButton &&
                 Object.keys(CATEGORY_TO_SCRAPERS).contains(fileCategory) && 
                 CATEGORY_TO_SCRAPERS[fileCategory].contains(scraperName)
             ) {
@@ -115,7 +123,7 @@ export class ImageSearchModal extends Modal {
 
         // commit image selection on click
         commitButtonEl.onclick = (evt: MouseEvent) => {
-            this.commitSelectionToGallery();
+            this.commitSelectionToGallery(); //TODO
             this.close();
         }
         
@@ -128,24 +136,25 @@ export class ImageSearchModal extends Modal {
 
 
     private async getFirstGalleryInCurrentFile(): Promise<[string, string[]]> {
-
-        const activeFile = this.app.workspace.getActiveFile();
-        if (!activeFile) {
-            new Notice("WARNING: no active file was found!");
+        if (!this.activeFile) {
             return ["", []];
         }
 
-        const currentContent = await this.app.vault.read(activeFile);
-        const matchB = currentContent.match(/!\[header\]\(([\S]*)\)/);
+        const currentContent = await this.app.vault.read(this.activeFile);
+        return this.galleryRawToContent(currentContent);
+                
+    }
+
+
+    private galleryRawToContent(text: string): [string, string[]] {
+        const matchB = text.match(/!\[header\]\(([\S]*)\)/);
         if (matchB) {
-            const urlList = (matchB[1] ?? "")
-                .split('\n')
-                .map((line) => line.trim())
-                .filter((line) => line);
-            return [matchB[0], urlList]; 
+            const url = (matchB[1] ?? "").trim();
+            return [matchB[0], [url]]; 
         }
 
-        const matchA = currentContent.match(/```gallery[\s]*\n([\S\s]*?)\n```/);
+        // const matchA = text.match(/```gallery[\s]*\n([\S\s]*?)\n```/);
+        const matchA = text.match(/```gallery[\s]*?\n```(?!gallery)|```gallery[\s]*\n([\S\s]*?)\n```(?!gallery)/);
         if (matchA) {
             const urlList = (matchA[1] ?? "")
                 .split('\n')
@@ -153,22 +162,22 @@ export class ImageSearchModal extends Modal {
                 .filter((line) => line);
             return [matchA[0], urlList]; 
         }
-        
+
         return ["", []];
     }
 
 
     private async commitSelectionToGallery() {
-        const newGalleryContent = '\n' + '```gallery' + '\n' + this.selectedImages.join('\n') + '\n' + '```';
-        const activeFile = this.app.workspace.getActiveFile();
-        console.log(activeFile);
-        if (!activeFile) {
-            new Notice("WARNING: No active file was found!");
-            return;
+        const newGalleryContent = '```gallery\n' + this.selectedImages.join('\n') + '\n```';
+        
+        if (!this.activeFile || this.targetGalleryRaw === "") {
+            copyToClipboard(newGalleryContent);
+        } else {
+            const currentContent = await this.app.vault.read(this.activeFile);
+            const newContent = currentContent.replace(this.targetGalleryRaw, newGalleryContent);
+            this.app.vault.modify(this.activeFile, newContent);
         }
-        const currentContent = await this.app.vault.read(activeFile);
-        const newContent = currentContent.replace(this.targetGalleryRaw, newGalleryContent);
-        await this.app.vault.modify(activeFile, newContent);
+
     }
 
 
@@ -178,9 +187,8 @@ export class ImageSearchModal extends Modal {
         const activeScrapersList = Object.keys(this.activeScrapers).filter((v: ScraperName) => this.activeScrapers[v] == true);
 
         if (activeScrapersList.length === 0) {
-            this.imgContainerEl.createSpan({ cls: 'empty-selection', text: 'There are no active scrapers!'});
+            // this.imgContainerEl.createSpan({ cls: 'empty-selection', text: 'There are no active scrapers!'});
             // new Notice("WARNING: no active scraper was found!");
-            return;
         }
 
         let id = 0;
@@ -252,25 +260,25 @@ export class ImageSearchModal extends Modal {
 
 
     private getCurrentFileInfo(): { fileName: string, fileCategory: MediaCategory | "" } {
-        const currentFile = this.app.workspace.getActiveFile();
-
-        if (!currentFile) {
+        if (!this.activeFile) {
             return { fileName: "", fileCategory: "" };
         }
         
         const regex = new RegExp(ANALYSIS_FOLDER_NAME + "\/!(.*)\/") // /!Analysis\/!(.*)\//
-        const match = currentFile.path.match(regex);
+        const match = this.activeFile.path.match(regex);
 
         return {
-            fileName: currentFile.basename,
+            fileName: this.activeFile.basename,
             fileCategory: match ? match[1].replace(/!/g,"") as MediaCategory : ""
         };
     }
     
 }
 
+// New Layout
+//TODO: rifare layout della galleria su figma
+//TODO: modificare layout delle immagini da scegliere, separando in sezioni distinte grid?
 
-//TODO: inserire un button direttamente sulla galleria che apra il modulo per editarla, in modo da poter avere più di una galleria per file
-
+// Fancy Stuff
 //TODO: trovare il modo di far vedere l'ordine di selezione nel modale con le checkbox
 //TODO: se arrivo fino a quì sarebbe il caso di aggiungere anche un indicatore del numero dell'immagine nel display della galleria (persona style?)

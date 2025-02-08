@@ -21,7 +21,7 @@ export default class extends Plugin {
 
         this.addRibbonIcon('disc-3'     , 'Import From Link', (evt: MouseEvent) => new ImportFromLinkModal(this.app, this.secretSettings).open());
         this.addRibbonIcon('image-plus' , 'Image Search', (evt: MouseEvent) => new ImageSearchModal(this.app).open());
-        this.addRibbonIcon('trash-2'    , 'Old Banner Search', (evt: MouseEvent) => new OldBannerSearchModal(this.app).open());
+        // this.addRibbonIcon('trash-2'    , 'Old Banner Search', (evt: MouseEvent) => new OldBannerSearchModal(this.app).open());
         this.addRibbonIcon('scan-eye'   , 'Error Scan', (evt: MouseEvent) => new ErrorScannerModal(this.app).open());
         this.addRibbonIcon('github'     , 'Git Push', (evt: MouseEvent) => new GitPushModal(this.app).open());
 

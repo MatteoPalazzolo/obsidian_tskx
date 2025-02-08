@@ -7,6 +7,7 @@ If your plugin does not need CSS, delete this file.
 
 */
 
+/*
 .BannerSearchModal {
 
     .modal:has(&) {
@@ -77,7 +78,7 @@ If your plugin does not need CSS, delete this file.
     }
 
 }
-
+*/
 
 .ImageSearchModal {
 
@@ -267,9 +268,26 @@ If your plugin does not need CSS, delete this file.
         height: 100%;
         background-size: contain;
         background-repeat: no-repeat;
-        background-position-x: center;
+        background-position: center;
         aspect-ratio: 16/9;
         transition: background .1s;
+    }
+
+    & .edit-content-button {
+        z-index: 6;
+        position: absolute;
+        bottom: 0;
+        right: 50%;
+        transform: translateX(-50%);
+        aspect-ratio: 1/1;
+        height: 50px;
+        opacity: 0;
+        background-color: var(--tab-container-background);
+
+        .GalleryCodeBlock:hover & {
+            opacity: 1;
+        }
+
     }
 
     & .arrow-container {
