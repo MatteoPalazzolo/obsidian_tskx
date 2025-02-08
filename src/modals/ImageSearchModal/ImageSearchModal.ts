@@ -27,24 +27,34 @@ const CATEGORY_TO_SCRAPERS: Record<MediaCategory, ScraperName[]> = {
 
 
 export class ImageSearchModal extends Modal {
-    
-    activeScrapers: Record<ScraperName, boolean>;
-    selectedImages: string[];
 
+    public  targetGalleryRaw: string;
+    public  targetGalleryContent: string[];
+    private activeScrapers: Record<ScraperName, boolean>;
+    private selectedImages: string[];
     private imgContainerEl: HTMLDivElement;
 
-    constructor(app: App) {
+    constructor(app: App, targetGalleryRaw = "") {
         super(app);
-        
         // genera dinamicamente un dizionario che associa ad ogni nome di scraper un valore booleano
         this.activeScrapers = Object.fromEntries(Object.keys(SCRAPERS).map((k) => [k, false])) as Record<ScraperName, boolean>;
         this.selectedImages = [];
+        this.targetGalleryRaw = targetGalleryRaw;
+        this.targetGalleryContent = [];
     }
 
     async onOpen() {
         const { contentEl } = this;
         contentEl.addClass("ImageSearchModal");
         contentEl.createEl('h3', { text: 'Image Search' });
+
+        if (this.targetGalleryRaw === "") {
+            [this.targetGalleryRaw, this.targetGalleryContent] = await this.getFirstGalleryInCurrentFile();
+        }
+        if (this.targetGalleryRaw === "") {
+            new Notice("WARNING: no active gallery was found!");
+            return;
+        }
 
         const searchBarDivEl = contentEl.createDiv({ cls: 'input-container' });
 
@@ -89,8 +99,6 @@ export class ImageSearchModal extends Modal {
         contentEl.createEl('hr');
 
         this.imgContainerEl = contentEl.createDiv({ cls: 'images-container' });
-
-        //CSS column: 300px
         
         this.searchAndLoadImages(fileName);
 
@@ -101,13 +109,15 @@ export class ImageSearchModal extends Modal {
             }
         };
 
-        // search on button click
+        // search on click
         searchButtonEl.onclick = (evt: MouseEvent) =>
             this.searchAndLoadImages(inputEl.value);
 
-        // commit image selection to the first gallery in the page on click
-        commitButtonEl.onclick = (evt: MouseEvent) =>
+        // commit image selection on click
+        commitButtonEl.onclick = (evt: MouseEvent) => {
             this.commitSelectionToGallery();
+            this.close();
+        }
         
     }
     
@@ -117,10 +127,54 @@ export class ImageSearchModal extends Modal {
     }
 
 
+    private async getFirstGalleryInCurrentFile(): Promise<[string, string[]]> {
+
+        const activeFile = this.app.workspace.getActiveFile();
+        if (!activeFile) {
+            new Notice("WARNING: no active file was found!");
+            return ["", []];
+        }
+
+        const currentContent = await this.app.vault.read(activeFile);
+        const matchB = currentContent.match(/!\[header\]\(([\S]*)\)/);
+        if (matchB) {
+            const urlList = (matchB[1] ?? "")
+                .split('\n')
+                .map((line) => line.trim())
+                .filter((line) => line);
+            return [matchB[0], urlList]; 
+        }
+
+        const matchA = currentContent.match(/```gallery[\s]*\n([\S\s]*?)\n```/);
+        if (matchA) {
+            const urlList = (matchA[1] ?? "")
+                .split('\n')
+                .map((line) => line.trim())
+                .filter((line) => line);
+            return [matchA[0], urlList]; 
+        }
+        
+        return ["", []];
+    }
+
+
+    private async commitSelectionToGallery() {
+        const newGalleryContent = '\n' + '```gallery' + '\n' + this.selectedImages.join('\n') + '\n' + '```';
+        const activeFile = this.app.workspace.getActiveFile();
+        console.log(activeFile);
+        if (!activeFile) {
+            new Notice("WARNING: No active file was found!");
+            return;
+        }
+        const currentContent = await this.app.vault.read(activeFile);
+        const newContent = currentContent.replace(this.targetGalleryRaw, newGalleryContent);
+        await this.app.vault.modify(activeFile, newContent);
+    }
+
+
     private async searchAndLoadImages(query: string) {
         this.imgContainerEl.empty();
 
-        let id = 0;
         const activeScrapersList = Object.keys(this.activeScrapers).filter((v: ScraperName) => this.activeScrapers[v] == true);
 
         if (activeScrapersList.length === 0) {
@@ -129,13 +183,28 @@ export class ImageSearchModal extends Modal {
             return;
         }
 
+        let id = 0;
+        const allUrls = [];
+
+        for (const targetImageUrl of this.targetGalleryContent) {
+            this.createImageCheckbox(targetImageUrl, id, true);
+            id += 1;
+            allUrls.push(targetImageUrl);
+        }
+
+        if (id > 0) {
+            this.imgContainerEl.createEl('hr');
+        }
+        
         for (const scraper of activeScrapersList) {
             for await (const url of SCRAPERS[scraper as ScraperName](query)) {
                 if (url === 'line') {
                     this.imgContainerEl.createEl('hr');
-                } else {
+                } 
+                else if (!allUrls.contains(url)) {
                     this.createImageCheckbox(url, id);
                     id += 1;
+                    allUrls.push(url);
                 }                
 
             }
@@ -150,12 +219,17 @@ export class ImageSearchModal extends Modal {
     }
 
 
-    private createImageCheckbox(url: string, id: number) {
-        // aggiungere un input checkbox e mettere l'immagine in una label legata all'input
+    private createImageCheckbox(url: string, id: number, startChecked: boolean = false) {
+        
         const div = this.imgContainerEl.createDiv({ attr: { src: url }, cls: 'my-image-checkbox-div' });
             const label = div.createEl('label', { attr: { for: 'my-checkbox-' + id }  });
                 const img = label.createEl('img', { attr: { src: url }  });
             const checkbox = div.createEl('input', { attr: { id: 'my-checkbox-' + id, 'data-url': url }, type: 'checkbox' })
+
+        if (startChecked) {
+            checkbox.checked = true;
+            this.selectedImages.push(url);
+        }
         
         img.onmousedown = (evt: MouseEvent) => {
             const imgSrc = (evt.currentTarget as HTMLImageElement).src;
@@ -177,20 +251,6 @@ export class ImageSearchModal extends Modal {
     }
 
 
-    private async commitSelectionToGallery() {
-        const newGallery = '\n' + '```gallery' + '\n' + this.selectedImages.join('\n') + '\n' + '```';
-        const activeFile = this.app.workspace.getActiveFile();
-        console.log(activeFile);
-        if (!activeFile) {
-            new Notice("WARNING: No active file was found!");
-            return;
-        }
-        const currentContent = await this.app.vault.read(activeFile);
-        console.log(currentContent);
-        await this.app.vault.modify(activeFile, currentContent + newGallery);
-    }
-
-
     private getCurrentFileInfo(): { fileName: string, fileCategory: MediaCategory | "" } {
         const currentFile = this.app.workspace.getActiveFile();
 
@@ -209,11 +269,8 @@ export class ImageSearchModal extends Modal {
     
 }
 
-//TODO: aggiungi i link già presenti in quella galleria come opzioni, ma con la checkbox già spuntata e già inserite nella lista di link di default
-//TODO: fai in modo che riconosca la presenza di una galleria con una regex e che sostituisca quella nuova a quella già presente
-//TODO: se non esiste nessuna galleria prova a cercare un ![header](...), prendi l'immagine e aggiungila in cima alla lista della selezione
-
-//TODO: trovare il modo di far vedere l'ordine di selezione nel modale con le checkbox
-//TODO: se arrivo fino a quì sarebbe il caso di aggiungere anche un indicatore del numero dell'immagine nella galleria
 
 //TODO: inserire un button direttamente sulla galleria che apra il modulo per editarla, in modo da poter avere più di una galleria per file
+
+//TODO: trovare il modo di far vedere l'ordine di selezione nel modale con le checkbox
+//TODO: se arrivo fino a quì sarebbe il caso di aggiungere anche un indicatore del numero dell'immagine nel display della galleria (persona style?)

@@ -20,7 +20,7 @@ export function registerCodeBlockProcessor(this: Plugin) {
             return;
         }
 
-        galleryEl.style.backgroundImage = "url(" + imageUrlList[activeSlide] + ")";
+        galleryEl.style.backgroundImage = "url(\"" + imageUrlList[activeSlide] + "\")";
 
         // se c'è una sola immagine non renderizzare le frecce
         if (imageUrlList.length === 1) {
@@ -37,7 +37,7 @@ export function registerCodeBlockProcessor(this: Plugin) {
             } else {
                 activeSlide -= 1;
             }
-            galleryEl.style.backgroundImage = "url(" + imageUrlList[activeSlide] + ")";
+            galleryEl.style.backgroundImage = "url(\"" + imageUrlList[activeSlide] + "\")";
         }
 
         // Create Right Arrow
@@ -46,7 +46,7 @@ export function registerCodeBlockProcessor(this: Plugin) {
         // next image
         rightArrowContainerEl.onclick = () => {
             activeSlide = (activeSlide + 1) % imageUrlList.length;
-            galleryEl.style.backgroundImage = "url(" + imageUrlList[activeSlide] + ")";
+            galleryEl.style.backgroundImage = "url(\"" + imageUrlList[activeSlide] + "\")";
         }
 
     });
