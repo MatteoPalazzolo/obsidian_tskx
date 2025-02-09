@@ -22,7 +22,7 @@ export async function* fetchSteamBanner(q: string): AsyncGenerator<string> {
     console.log(idLinks);
     console.groupEnd();
 
-    const imagesRegex = /href="[^"]*(https:\/\/shared.cloudflare.steamstatic.com\/store_item_assets\/steam\/apps\/[^"]*.jpg)[^"]*"/g;
+    const imagesRegex = /href="[^"]*(https:\/\/shared.(?:cloudflare|fastly).steamstatic.com\/store_item_assets\/steam\/apps\/[^"]*.jpg)[^"]*"/g;
 
     for (let idLink of idLinks) {
         const imagesHtml = await requestGetText(idLink);
@@ -36,7 +36,10 @@ export async function* fetchSteamBanner(q: string): AsyncGenerator<string> {
         for (const imgUrl of imageLinks) {
             yield imgUrl;
         }
-        yield 'line';
+
+        if (idLink !== idLinks[idLinks.length - 1]) {
+            yield 'line';
+        }
 
     }
     

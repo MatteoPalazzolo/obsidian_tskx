@@ -123,7 +123,7 @@ export class ImageSearchModal extends Modal {
 
         // commit image selection on click
         commitButtonEl.onclick = (evt: MouseEvent) => {
-            this.commitSelectionToGallery(); //TODO
+            this.commitSelectionToGallery();
             this.close();
         }
         
@@ -183,21 +183,17 @@ export class ImageSearchModal extends Modal {
 
     private async searchAndLoadImages(query: string) {
         this.imgContainerEl.empty();
+        this.selectedImages = [];
 
         const activeScrapersList = Object.keys(this.activeScrapers).filter((v: ScraperName) => this.activeScrapers[v] == true);
 
-        if (activeScrapersList.length === 0) {
-            // this.imgContainerEl.createSpan({ cls: 'empty-selection', text: 'There are no active scrapers!'});
-            // new Notice("WARNING: no active scraper was found!");
-        }
-
         let id = 0;
-        const allUrls = [];
+        const avoidUrlRepetition = new Set<string>();
 
         for (const targetImageUrl of this.targetGalleryContent) {
             this.createImageCheckbox(targetImageUrl, id, true);
+            avoidUrlRepetition.add(targetImageUrl);
             id += 1;
-            allUrls.push(targetImageUrl);
         }
 
         if (id > 0) {
@@ -209,17 +205,23 @@ export class ImageSearchModal extends Modal {
                 if (url === 'line') {
                     this.imgContainerEl.createEl('hr');
                 } 
-                else if (!allUrls.contains(url)) {
-                    this.createImageCheckbox(url, id);
+                else if (!avoidUrlRepetition.has(url)) {
+                    this.createImageCheckbox(url, id, false);
+                    avoidUrlRepetition.add(url);
                     id += 1;
-                    allUrls.push(url);
                 }                
 
             }
 
         }
 
-        if (id === 0) {
+        if (activeScrapersList.length === 0) {
+            this.imgContainerEl.createEl('hr');
+            this.imgContainerEl.createSpan({ cls: 'empty-selection', text: 'There are no active scrapers!'});
+            // new Notice("WARNING: no active scraper was found!");
+        }
+        else if (id <= this.targetGalleryContent.length) {
+            this.imgContainerEl.createEl('hr');
             this.imgContainerEl.createSpan({ cls: 'empty-selection', text: 'No image found!'});
             // new Notice("WARNING: no image found!");
         }
@@ -238,6 +240,8 @@ export class ImageSearchModal extends Modal {
             checkbox.checked = true;
             this.selectedImages.push(url);
         }
+
+        console.log(this.selectedImages);
         
         img.onmousedown = (evt: MouseEvent) => {
             const imgSrc = (evt.currentTarget as HTMLImageElement).src;
@@ -252,8 +256,9 @@ export class ImageSearchModal extends Modal {
                 this.selectedImages.push(url);
             } else {
                 const i = this.selectedImages.indexOf(url);
-                this.selectedImages.splice(i, 1);    
+                this.selectedImages.splice(i, 1);
             }
+            console.log(this.selectedImages);
         }
 
     }
@@ -277,7 +282,6 @@ export class ImageSearchModal extends Modal {
 
 // New Layout
 //TODO: rifare layout della galleria su figma
-//TODO: modificare layout delle immagini da scegliere, separando in sezioni distinte grid?
 
 // Fancy Stuff
 //TODO: trovare il modo di far vedere l'ordine di selezione nel modale con le checkbox
