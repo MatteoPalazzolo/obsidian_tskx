@@ -1,17 +1,14 @@
-import { App, Modal, Notice, setIcon, TFile } from "obsidian";
+import { App, Modal, setIcon, TFile } from "obsidian";
 import {
     fetchSteamBanner,
     fetchItchioBanner,
     fetchTMDbBanner
 } from './imageScrapers';
-import { ANALYSIS_FOLDER_NAME } from "src/conts";
 import { copyToClipboard } from "src/utils/clipboard";
 
 //TOEDIT: da modificare per aggiungere scrapers
 type ScraperName = "steam" | "itchio" | "tmdb";
 type ScraperGenerator = (q: string) => AsyncGenerator<string>;
-
-//TOEDIT: da modificare per aggiungere scrapers
 const SCRAPERS: Record<ScraperName, ScraperGenerator> = {
     "steam": fetchSteamBanner,
     "itchio": fetchItchioBanner,
@@ -19,15 +16,11 @@ const SCRAPERS: Record<ScraperName, ScraperGenerator> = {
 }
 
 //TOEDIT: da modificare per assegnare cartelle a scraper
-type MediaCategory = "Videogames" | "Shows" | "Movies";
-
-//TOEDIT: da modificare per assegnare cartelle a scraper
-const CATEGORY_TO_SCRAPERS: Record<MediaCategory, ScraperName[]> = {
-    "Videogames": ["steam", "itchio"],
-    "Shows": ["tmdb"],
-    "Movies": ["tmdb"]
+const FILEPATH_TO_SCRAPERS: Record<string, ScraperName[]> = {
+    "!MediaAnalysis/!Videogames/!Videogames": ["steam", "itchio"],
+    "!MediaAnalysis/!Movies&Shows/!Movies": ["tmdb"],
+    "!MediaAnalysis/!Movies&Shows/!Shows": ["tmdb"]
 }
-
 
 export class ImageSearchModal extends Modal {
 
@@ -77,7 +70,8 @@ export class ImageSearchModal extends Modal {
         const checkboxDiv = contentEl.createDiv({ cls: 'my-checkbox-container' });
 
         // Get file info
-        const { fileName, fileCategory } = this.getCurrentFileInfo();
+        const fileName = this.activeFile?.basename ?? "";
+        const filePath = this.activeFile?.parent?.path ?? "";
 
         // Autofill query with fileName
         if (fileName && !this.fromGalleryButton) {
@@ -93,14 +87,21 @@ export class ImageSearchModal extends Modal {
             checkbox.oninput = (e) => {
                 this.activeScrapers[scraperName] = (e.currentTarget as HTMLInputElement).checked;
             }
-            if (
-                fileCategory &&
-                !this.fromGalleryButton &&
-                Object.keys(CATEGORY_TO_SCRAPERS).contains(fileCategory) && 
-                CATEGORY_TO_SCRAPERS[fileCategory].contains(scraperName)
-            ) {
-                this.activeScrapers[scraperName] = true;
-                checkbox.checked = true;
+            
+            // utilizza il percorso più lungo che combacia
+            if (filePath && !this.fromGalleryButton) {
+                let path = "";
+                for (const testPath of Object.keys(FILEPATH_TO_SCRAPERS)) {
+                    if (filePath.startsWith(testPath)) {
+                        if (path === "" || testPath.length > path.length) {
+                            path = testPath;
+                        }
+                    }
+                }
+                if (path && FILEPATH_TO_SCRAPERS[path].contains(scraperName)) {
+                    this.activeScrapers[scraperName] = true;
+                    checkbox.checked = true;
+                }
             }
         }
 
@@ -261,21 +262,6 @@ export class ImageSearchModal extends Modal {
             console.log(this.selectedImages);
         }
 
-    }
-
-
-    private getCurrentFileInfo(): { fileName: string, fileCategory: MediaCategory | "" } {
-        if (!this.activeFile) {
-            return { fileName: "", fileCategory: "" };
-        }
-        
-        const regex = new RegExp(ANALYSIS_FOLDER_NAME + "\/!(.*)\/") // /!Analysis\/!(.*)\//
-        const match = this.activeFile.path.match(regex);
-
-        return {
-            fileName: this.activeFile.basename,
-            fileCategory: match ? match[1].replace(/!/g,"") as MediaCategory : ""
-        };
     }
     
 }
