@@ -1,5 +1,5 @@
 import { Plugin, Notice } from 'obsidian';
-import { OldBannerSearchModal }    from 'src/Modals/OldBannerSearchModal/OldBannerSearchModal';
+// import { OldBannerSearchModal }    from 'src/Modals/OldBannerSearchModal/OldBannerSearchModal';
 import { ImageSearchModal }    from 'src/Modals/ImageSearchModal/ImageSearchModal';
 import { GitPushModal }         from 'src/Modals/GitPushModal/GitPushModal';
 import { ErrorScannerModal }  from 'src/Modals/ErrorScannerModal/ErrorScannerModal';
@@ -8,6 +8,7 @@ import { registerCodeBlockProcessor }           from 'src/Widgets/GalleryCodeBlo
 import { registerIframeMarkdownPostProcessor }  from 'src/Widgets/IframePostProcessor';
 import { SecretSettings } from 'src/types';
 import { SECRET_SETTINGS_FILENAME } from 'src/conts';
+import { registerTemplatezListener } from 'src/utils/templatez';
 
 
 export default class extends Plugin {
@@ -27,6 +28,7 @@ export default class extends Plugin {
 
         registerIframeMarkdownPostProcessor.call(this);
         registerCodeBlockProcessor.call(this);
+        registerTemplatezListener.call(this);        
 
     }
 
