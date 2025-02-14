@@ -17,29 +17,10 @@ export function registerCodeBlockProcessor(this: Plugin) {
         // Create Gallery
         const galleryEl = galleryContainerEl.createEl('div', { cls: 'gallery' });
 
-        // Create Button per editare la galleria con ImageSearchModal
-        const editGalleryButtonEl = galleryContainerEl.createSpan({ cls: 'edit-content-button clickable-icon' });
-        setIcon(editGalleryButtonEl, 'pencil');
-        editGalleryButtonEl.onclick = (evt: MouseEvent) => new ImageSearchModal(this.app, '```gallery\n' + source + '\n```').open()
-        
-        // se non ci sono immagini rendi lo sfondo grigio
-        if (imageUrlList.length === 0) {
-            galleryEl.style.backgroundColor = "var(--tab-container-background)";
-            return;
-        }
-        
-        galleryEl.style.backgroundImage = "url(\"" + imageUrlList[activeSlide] + "\")";
-        
-        // se c'è una sola immagine non renderizzare le frecce
-        if (imageUrlList.length === 1) {
-            return;
-        }
-
-        // Create Left Arrow
-        const leftArrowContainerEl = galleryContainerEl.createDiv({ cls: 'arrow-container left' });
-        leftArrowContainerEl.createSpan({ text: '<' });
-        // previous image
-        leftArrowContainerEl.onclick = () => {
+        // Create Small Menu
+        const smallMenuDivEl = galleryContainerEl.createDiv({ cls: 'small-menu' });
+        const sxArrowBtnEl = smallMenuDivEl.createSpan({ cls: 'small-menu-btn arrow clickable-icon' });
+        sxArrowBtnEl.onclick = () => {
             if (activeSlide === 0) {
                 activeSlide = imageUrlList.length - 1;
             } else {
@@ -47,15 +28,38 @@ export function registerCodeBlockProcessor(this: Plugin) {
             }
             galleryEl.style.backgroundImage = "url(\"" + imageUrlList[activeSlide] + "\")";
         }
-
-        // Create Right Arrow
-        const rightArrowContainerEl = galleryContainerEl.createDiv({ cls: 'arrow-container right' });
-        rightArrowContainerEl.createSpan({ text: '>'  });
-        // next image
-        rightArrowContainerEl.onclick = () => {
+        setIcon(sxArrowBtnEl, 'chevron-left');
+        const editGalleryBtnEl = smallMenuDivEl.createSpan({ cls: 'small-menu-btn clickable-icon' });
+        editGalleryBtnEl.onclick = (evt: MouseEvent) => new ImageSearchModal(this.app, '```gallery\n' + source + '\n```').open()
+        setIcon(editGalleryBtnEl, 'pencil');
+        const dxArrowBtnEl = smallMenuDivEl.createSpan({ cls: 'small-menu-btn arrow clickable-icon' });
+        dxArrowBtnEl.onclick = () => {
             activeSlide = (activeSlide + 1) % imageUrlList.length;
             galleryEl.style.backgroundImage = "url(\"" + imageUrlList[activeSlide] + "\")";
         }
+        setIcon(dxArrowBtnEl, 'chevron-right');
+        
+        // se non ci sono immagini rendi lo sfondo grigio e non renderizzare le frecce
+        if (imageUrlList.length === 0) {
+            galleryEl.style.backgroundColor = "var(--tab-container-background)";
+            smallMenuDivEl.addClass('no-arrows');
+            return;
+        }
+        
+        galleryEl.style.backgroundImage = "url(\"" + imageUrlList[activeSlide] + "\")";
+        
+        // se c'è una sola immagine non renderizzare le frecce
+        if (imageUrlList.length === 1) {
+            smallMenuDivEl.addClass('no-arrows');
+            return;
+        }
+
+        // Left Area
+        const leftArrowContainerEl = galleryContainerEl.createDiv({ cls: 'arrow-container left' });
+        leftArrowContainerEl.onclick = sxArrowBtnEl.onclick
+        // Right Area
+        const rightArrowContainerEl = galleryContainerEl.createDiv({ cls: 'arrow-container right' });
+        rightArrowContainerEl.onclick = dxArrowBtnEl.onclick;
 
     });
 }

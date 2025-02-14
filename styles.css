@@ -275,30 +275,47 @@ If your plugin does not need CSS, delete this file.
     }
 
     & .small-menu {
-
-    }
-    & .edit-content-button {
-        z-index: 6;
         position: absolute;
-        bottom: 0;
+        z-index: 1;
+        bottom: 10px;
         right: 50%;
         transform: translateX(50%);
-        aspect-ratio: 1/1;
-        height: 50px;
-        opacity: 0;
-        background-color: var(--tab-container-background);
 
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        
+        width:  clamp(100px, 20%, 160px);
+        &.no-arrows {
+            width: auto;
+            aspect-ratio: 1/1;
+        }
+        height: clamp(30px, 10%, 50px);
+
+        background-color: var(--tab-container-background);
+        border-radius: var(--clickable-icon-radius);
+
+        opacity: 0;
         .GalleryCodeBlock:hover & {
             opacity: 1;
         }
 
+        & .small-menu-btn {
+            height: 80%;
+            aspect-ratio: 1/1;
+        }
+
+        &.no-arrows > .small-menu-btn.arrow {
+            display: none;
+        }
+        
     }
 
     & .arrow-container {
         position: absolute;
         top: 0;
         bottom: 0;
-        width: 50%;
+        width: 33%;
 
         background-color: #0000;
         opacity: 0;
