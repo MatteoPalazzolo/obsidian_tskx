@@ -60,12 +60,12 @@ export class SpotifyAlbumLinkProcessor extends LinkProcessor<NewSpotifyAlbumData
         ];
 
     }
-
+    
     processTemplate(templateContent: string, data: NewSpotifyAlbumData): string {
         return templateContent
-            .replace("<% tp.date.now(\"YYYY-MM-DD\") %>", dayjs().format("YYYY-MM-DD"))
-            .replace("{title}", data.name)
-            .replace("{author}", "\n  - " + data.artists.join("\n  - "))
+            .replace(/^date:[^\S\n]*$/m, "date: " + dayjs().format("YYYY-MM-DD"))
+            .replace(/^name:[^\S\n]*$/m, "name: " + data.name) //TODO: escape chars
+            .replace(/^author:[^\S\n]*\[\][^\S\n]*$/m, "author:\n  - " + data.artists.join("\n  - ")) //TODO: escape chars
             .replace("https://open.spotify.com/album/", `https://open.spotify.com/album/${this.uid}`);
 
     }

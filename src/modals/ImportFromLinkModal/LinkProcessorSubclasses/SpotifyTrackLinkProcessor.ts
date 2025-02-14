@@ -69,12 +69,13 @@ export class SpotifyTrackLinkProcessor extends LinkProcessor<NewSpotifyTrackData
 
     processTemplate(templateContent: string, data: NewSpotifyTrackData): string {
         return templateContent
-            .replace("<% tp.date.now(\"YYYY-MM-DD\") %>", dayjs().format("YYYY-MM-DD"))
-            .replace("{name}", data.name)
-            .replace("{author}", "\n  - " + data.artists.join("\n  - "))
-            .replace("{album}", data.album)
-            .replace("{index}", "" + data.track_number)
-            .replace("https://open.spotify.com/track/", `https://open.spotify.com/track/${this.uid}`);
+            .replace(/^date:[^\S\n]*$/m, "date: " + dayjs().format("YYYY-MM-DD"))
+            .replace(/^name:[^\S\n]*$/m, "name: " + data.name) //TODO: escape chars
+            .replace(/^author:[^\S\n]*\[\][^\S\n]*$/m, "author:\n  - " + data.artists.join("\n  - ")) //TODO: escape chars
+            .replace(/^album:[^\S\n]*$/m, "album: " + data.album) //TODO: escape chars
+            .replace(/^index:[^\S\n]*$/m, "index: " + data.track_number)
+            .replace("https://open.spotify.com/artist/", `https://open.spotify.com/artist/${this.uid}`);
+
     }
 
 }

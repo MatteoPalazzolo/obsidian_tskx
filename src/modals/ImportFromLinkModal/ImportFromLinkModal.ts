@@ -1,26 +1,26 @@
-import { App, Modal, Notice, setIcon, TFile } from 'obsidian';
+import { App, Modal, Notice, setIcon } from 'obsidian';
 import { LinkProcessorSettings, SecretSettings } from "../../types";
 import { SpotifyTrackLinkProcessor } from './LinkProcessorSubclasses/SpotifyTrackLinkProcessor';
 import { SpotifyArtistLinkProcessor } from './LinkProcessorSubclasses/SpotifyArtistLinkProcessor';
 import { SpotifyAlbumLinkProcessor } from './LinkProcessorSubclasses/SpotifyAlbumLinkProcessor';
 
 
-export class ImportFromLinkModal extends Modal {
+const SETTINGS: { [key in "TRACK" | "ARTIST" | "ALBUM"]: LinkProcessorSettings } = {
+    TRACK: {
+        destinationFolder:  "!MediaAnalysis/!Music/!Songs/",
+        templateFilePath:   "!MediaAnalysis/!Music/!Songs/!Template.md"
+    },
+    ARTIST: {
+        destinationFolder:  "!MediaAnalysis/!Music/!Artists/",
+        templateFilePath:   "!MediaAnalysis/!Music/!Artists/!Template.md"
+    },
+    ALBUM: {
+        destinationFolder:  "!MediaAnalysis/!Music/!Albums/",
+        templateFilePath:   "!MediaAnalysis/!Music/!Albums/!Template.md"
+    },
+};
 
-    static SETTINGS: { [key in "TRACK" | "ARTIST" | "ALBUM"]: LinkProcessorSettings } = {
-        TRACK: {
-            destinationFolder: "Analysis/Musica/Canzoni/",
-            templateFilePath: "!Templates/Music Song Analysis Template.md"
-        },
-        ARTIST: {
-            destinationFolder: "Analysis/Musica/Artisti/",
-            templateFilePath: "!Templates/Music Artist Analysis Template.md"
-        },
-        ALBUM: {
-            destinationFolder: "Analysis/Musica/Album/",
-            templateFilePath: "!Templates/Music Album Analysis Template.md"
-        },
-    };
+export class ImportFromLinkModal extends Modal {
 
     secretSettings: SecretSettings;
 
@@ -87,15 +87,15 @@ export class ImportFromLinkModal extends Modal {
             const [, thisType, thisId] = match;
             switch (thisType) {
                 case "track":
-                    new SpotifyTrackLinkProcessor( this, ImportFromLinkModal.SETTINGS.TRACK, link,
+                    new SpotifyTrackLinkProcessor( this, SETTINGS.TRACK, link,
                         ansContainerEl, thisId, this.secretSettings ).processLink();
                     return;
                 case "album":
-                    new SpotifyAlbumLinkProcessor( this, ImportFromLinkModal.SETTINGS.ALBUM, link, 
+                    new SpotifyAlbumLinkProcessor( this, SETTINGS.ALBUM, link, 
                         ansContainerEl, thisId, this.secretSettings ).processLink();
                     return;
                 case "artist":
-                    new SpotifyArtistLinkProcessor( this, ImportFromLinkModal.SETTINGS.ARTIST, link, 
+                    new SpotifyArtistLinkProcessor( this, SETTINGS.ARTIST, link, 
                         ansContainerEl, thisId, this.secretSettings ).processLink();
                     return;
                 default:

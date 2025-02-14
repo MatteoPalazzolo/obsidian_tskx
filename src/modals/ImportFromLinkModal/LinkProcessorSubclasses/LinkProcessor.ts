@@ -1,4 +1,4 @@
-import { Modal, Notice, TFile } from "obsidian";
+import { Modal, Notice, TFile, WorkspaceLeaf } from "obsidian";
 import { LinkProcessorSettings } from "src/types";
 
 
@@ -111,7 +111,8 @@ export abstract class LinkProcessor<T> {
         });
 
         if (newFile) {
-            this.thisModal.app.workspace.getLeaf(false).openFile(newFile);
+            const leaf: WorkspaceLeaf = this.thisModal.app.workspace.getLeaf(false);
+            await leaf.openFile(newFile);
         }
     }
 

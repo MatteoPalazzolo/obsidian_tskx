@@ -5,8 +5,12 @@ export async function registerTemplatezListener(this: Plugin) {
     // wait a bit to avoid event trigger on file loaded from the valut
     await delay(300); 
     
-    this.app.vault.on("create", file => {
-        if (file.name.startsWith("Untitled") && file instanceof TFile) {
+    this.app.vault.on("create", async file => {
+        if (!(file instanceof TFile) || file.extension !== "md") {
+            return;
+        }
+        const content = await this.app.vault.read(file);
+        if (file.name.startsWith("Untitled") && content === "") {
             templetizeFile.call(this, file);
         }
     });
@@ -29,14 +33,72 @@ export async function templetizeFile(this: Plugin, file: TAbstractFile) {
 
         const folderPath = f.path === "/" ? "" : f.path + "/";
         const templateFile = this.app.vault.getAbstractFileByPath(folderPath + "!Template.md");
-        if (templateFile === null || !(templateFile instanceof TFile)) {
-            continue;
-        } else {
+
+        if (templateFile !== null && templateFile instanceof TFile) {
             const templateContent = await this.app.vault.read(templateFile);
-            await this.app.vault.modify(file, templateContent);
+            this.app.vault.modify(file, templateContent);
             break;
         }
 
     }
     
 }
+
+export function escapeFilePropertyStrings(s: string): string {
+    if (s.startsWith("'")) {
+        if (!s.includes('"')) {
+            return `"${s}"`;
+        } 
+        else {
+            return `"${s.replace(/"/g, '\\\"')}"`;
+        }
+    } 
+    else if (s.startsWith('"')) {
+        if (!s.includes("'")) {
+            return `'${s}'`;
+        } 
+        else {
+            return `"${s.replace(/"/g, '\\\"')}"`;
+        }
+    }
+    else if (s.startsWith("`")) {
+        if (!s.includes('"')) {
+            return `"${s}"`;
+        }
+        else if (!s.includes("'")) {
+            return `'${s}'`;
+        } 
+        else {
+            return `"${s.replace(/"/g, '\\\"')}"`;
+        }
+    }
+    else {
+        return s;
+    }
+
+}
+
+
+// se inizia con ' e non contiene " -> viene circondato da "
+// '     -> "'"
+// 'aa   -> "'aa"
+// 'a'   -> "'a'"
+
+// se inizia con " -> viene circondato da '
+// "     -> '"'
+// "aa   -> '"aaa'
+// "a"   -> '"a"'
+
+// se inizia con " o ' e presenta l'altro carattere nella stringa -> viene circondato da " e tutte le " interne diventano \"
+// "a'   -> "\"a'"
+// 'a"   -> "'a\""
+
+// se inizia con ` e non contiene " -> viene circondato da "
+// `aa`  -> "`aa`"
+// `aa   -> "`aa"
+
+// se inizia con ` e non contiene ' -> viene circondato da '
+// `aa`  -> "`aa`"
+// `aa   -> "`aa"
+
+// se inizia con ` e contiene sia " che ' -> viene circondato da " e tutte le " interne diventano \"

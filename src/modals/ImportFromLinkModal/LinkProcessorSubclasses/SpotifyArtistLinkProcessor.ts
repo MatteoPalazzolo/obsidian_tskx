@@ -60,9 +60,10 @@ export class SpotifyArtistLinkProcessor extends LinkProcessor<NewSpotifyArtistDa
 
     processTemplate(templateContent: string, data: NewSpotifyArtistData): string {
         return templateContent
-            .replace("<% tp.date.now(\"YYYY-MM-DD\") %>", dayjs().format("YYYY-MM-DD"))
-            .replace("{name}", data.name)
+            .replace(/^date:[^\S\n]*$/m, "date: " + dayjs().format("YYYY-MM-DD"))
+            .replace(/^name:[^\S\n]*$/m, "name: " + data.name) //TODO: escape chars
             .replace("https://open.spotify.com/artist/", `https://open.spotify.com/artist/${this.uid}`);
+
     }
 
 }
