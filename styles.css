@@ -274,12 +274,15 @@ If your plugin does not need CSS, delete this file.
         transition: background .1s;
     }
 
+    & .small-menu {
+
+    }
     & .edit-content-button {
         z-index: 6;
         position: absolute;
         bottom: 0;
         right: 50%;
-        transform: translateX(-50%);
+        transform: translateX(50%);
         aspect-ratio: 1/1;
         height: 50px;
         opacity: 0;
@@ -292,13 +295,12 @@ If your plugin does not need CSS, delete this file.
     }
 
     & .arrow-container {
-        z-index: 5;
         position: absolute;
         top: 0;
         bottom: 0;
-        width: 5%;
+        width: 50%;
 
-        background-color: black;
+        background-color: #0000;
         opacity: 0;
         transition: opacity .1s;
         cursor: pointer;
