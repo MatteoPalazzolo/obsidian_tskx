@@ -45,6 +45,17 @@ export async function templetizeFile(this: Plugin, file: TAbstractFile) {
 }
 
 export function escapeFilePropertyStrings(s: string): string {
+    if (s.includes(":")) {
+        if (!s.includes('"')) {
+            return `"${s}"`;
+        }
+        else if (!s.includes("'")) {
+            return `'${s}'`;
+        } 
+        else {
+            return `"${s.replace(/"/g, '\\\"')}"`;
+        }
+    }
     if (s.startsWith("'")) {
         if (!s.includes('"')) {
             return `"${s}"`;
@@ -78,27 +89,3 @@ export function escapeFilePropertyStrings(s: string): string {
 
 }
 
-
-// se inizia con ' e non contiene " -> viene circondato da "
-// '     -> "'"
-// 'aa   -> "'aa"
-// 'a'   -> "'a'"
-
-// se inizia con " -> viene circondato da '
-// "     -> '"'
-// "aa   -> '"aaa'
-// "a"   -> '"a"'
-
-// se inizia con " o ' e presenta l'altro carattere nella stringa -> viene circondato da " e tutte le " interne diventano \"
-// "a'   -> "\"a'"
-// 'a"   -> "'a\""
-
-// se inizia con ` e non contiene " -> viene circondato da "
-// `aa`  -> "`aa`"
-// `aa   -> "`aa"
-
-// se inizia con ` e non contiene ' -> viene circondato da '
-// `aa`  -> "`aa`"
-// `aa   -> "`aa"
-
-// se inizia con ` e contiene sia " che ' -> viene circondato da " e tutte le " interne diventano \"

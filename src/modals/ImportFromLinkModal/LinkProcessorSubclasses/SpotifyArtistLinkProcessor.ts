@@ -3,6 +3,7 @@ import { LinkProcessorSettings, SecretSettings } from "src/types";
 import { LinkProcessor } from "./LinkProcessor";
 import { Artist, SpotifyApi } from "@spotify/web-api-ts-sdk";
 import dayjs from "dayjs";
+import { escapeFilePropertyStrings as scp } from "src/utils/templatez";
 
 interface NewSpotifyArtistData {
     name: string
@@ -61,7 +62,7 @@ export class SpotifyArtistLinkProcessor extends LinkProcessor<NewSpotifyArtistDa
     processTemplate(templateContent: string, data: NewSpotifyArtistData): string {
         return templateContent
             .replace(/^date:[^\S\n]*$/m, "date: " + dayjs().format("YYYY-MM-DD"))
-            .replace(/^name:[^\S\n]*$/m, "name: " + data.name) //TODO: escape chars
+            .replace(/^name:[^\S\n]*$/m, "name: " + scp(data.name))
             .replace("https://open.spotify.com/artist/", `https://open.spotify.com/artist/${this.uid}`);
 
     }
