@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <style>
+        body {
+            background-color: blueviolet;
+        }
+
+        details>p {
+            padding-left: 10px;
+            padding-bottom: 10px;
+        }
+
+        details {
+            border-radius: 5px;
+            /*
+            border: solid rgba(238, 238, 238, 0.911) 2px;*/
+            margin-bottom: 5px;
+            display: block;
+
+            &>summary {
+                border-radius: 5px;
+                padding: 10px;
+            }
+
+            &[open]>summary {
+                border-radius: 5px 5px 0 0;
+            }
+
+            &.error {
+                background-color: rgb(253, 152, 0);
+
+                &>summary {
+                    background-color: red;
+                }
+            }
+
+            &.warning>summary {
+                background-color: yellow;
+            }
+
+            &.info>summary {
+                background-color: lightblue;
+            }
+
+            &.suggestion>summary {
+                background-color: lightgray;
+            }
+        }
+    </style>
+
+    <details class="error">
+        <summary>Error (2)</summary>
+        <p>Neener neener!</p>
+    </details>
+
+    <details class="warning">
+        <summary>Warning (3)</summary>
+        <p>Neener neener!</p>
+    </details>
+
+    <details class="info">
+        <summary>Info (2)</summary>
+        <p>Neener neener!</p>
+    </details>
+
+    <details class="suggestion">
+        <summary>Suggestion (4)</summary>
+        <p>Neener neener!</p>
+    </details>
+
+</body>
+
+</html>

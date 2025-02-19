@@ -1,9 +1,9 @@
 import { Plugin, Notice } from 'obsidian';
 // import { OldBannerSearchModal }    from 'src/Modals/OldBannerSearchModal/OldBannerSearchModal';
-import { ImageSearchModal }    from 'src/Modals/ImageSearchModal/ImageSearchModal';
-import { GitPushModal }         from 'src/Modals/GitPushModal/GitPushModal';
-import { ErrorScannerModal }  from 'src/Modals/ErrorScannerModal/ErrorScannerModal';
-import { ImportFromLinkModal }  from 'src/Modals/ImportFromLinkModal/ImportFromLinkModal';
+import { ImageSearchModal }                     from 'src/Modals/ImageSearchModal/ImageSearchModal';
+import { GitPushModal }                         from 'src/Modals/GitPushModal/GitPushModal';
+import { ScannerModal }                         from 'src/Modals/ScannerModal/ScannerModal';
+import { ImportFromLinkModal }                  from 'src/Modals/ImportFromLinkModal/ImportFromLinkModal';
 import { registerCodeBlockProcessor }           from 'src/Widgets/GalleryCodeBlock';
 import { registerIframeMarkdownPostProcessor }  from 'src/Widgets/IframePostProcessor';
 import { SecretSettings } from 'src/types';
@@ -20,10 +20,9 @@ export default class extends Plugin {
 
         await this.loadSecretSettings();
 
-        this.addRibbonIcon('disc-3'     , 'Import From Link', (evt: MouseEvent) => new ImportFromLinkModal(this.app, this.secretSettings).open());
+        this.addRibbonIcon('link'     , 'Import From Link', (evt: MouseEvent) => new ImportFromLinkModal(this.app, this.secretSettings).open());
         this.addRibbonIcon('image-plus' , 'Image Search', (evt: MouseEvent) => new ImageSearchModal(this.app).open());
-        // this.addRibbonIcon('trash-2'    , 'Old Banner Search', (evt: MouseEvent) => new OldBannerSearchModal(this.app).open());
-        this.addRibbonIcon('scan-eye'   , 'Error Scan', (evt: MouseEvent) => new ErrorScannerModal(this.app).open());
+        this.addRibbonIcon('scan-eye'   , 'Scanner', (evt: MouseEvent) => new ScannerModal(this.app).open());
         this.addRibbonIcon('github'     , 'Git Push', (evt: MouseEvent) => new GitPushModal(this.app).open());
 
         registerIframeMarkdownPostProcessor.call(this);
