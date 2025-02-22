@@ -1,6 +1,7 @@
 import { App, Modal, TFile } from 'obsidian';
-import { ScannerABC } from './ScannerSubclasses/Scanner';
+import { ScannerABC } from './ScannerSubclasses/!ScannerABC';
 import { TodoScanner } from './ScannerSubclasses/TodoScanner';
+import { FillScanner } from './ScannerSubclasses/FillScanner';
 
 export class ErrorScannerModal extends Modal {
     constructor(app: App) {
@@ -92,17 +93,20 @@ export class ScannerModal extends Modal {
     constructor(app: App) {
         super(app);
         this.scannerList = [
-            new TodoScanner(),
+            new TodoScanner(this),
+            new FillScanner(this)
         ]
     }  
 
     async onOpen() {
         const { contentEl } = this;
-        contentEl.addClass("DefaultScannerModal");
-        contentEl.createEl('h3', { text: 'Default Image Scanner' });             
+        contentEl.addClass("ScannerModal");
+        contentEl.createEl('h3', { text: 'Scanner' });             
         
         await this.runAllScanner();
-        this.scannerList.forEach( scanner => scanner.render(contentEl) );
+        this.scannerList.forEach( 
+            scanner => scanner.render(contentEl)
+        );
 
     }
 

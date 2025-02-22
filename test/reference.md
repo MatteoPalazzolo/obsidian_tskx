@@ -13,6 +13,7 @@ function createInternalLink(parent: HTMLElement, name: string): HTMLElement {
         text: name, cls: "internal-link"
     });
 
+    // https://docs.obsidian.md/Reference/TypeScript+API/Workspace/openLinkText
     internalLink.addEventListener("click", (event: MouseEvent) => {
         event.preventDefault();
         this.app.workspace.openLinkText(name, "", true);

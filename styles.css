@@ -7,79 +7,6 @@ If your plugin does not need CSS, delete this file.
 
 */
 
-/*
-.BannerSearchModal {
-
-    .modal:has(&) {
-        min-width: 80%;
-    }
-
-    & .input-container {
-        width: 100%;
-        display: flex;
-        gap: 5px;
-        justify-content: space-around;
-        margin-bottom: 10px;
-
-        & input {
-            flex: 10;
-        }
-        & select {
-            flex: 5;
-        }
-        & span {
-            flex: 1;
-        }        
-    }
-
-    & .my-checkbox-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 5px;
-    }
-
-    & hr {
-        margin-top: 10px;
-        margin-bottom: 16px;
-    }
-
-    & .images-container {
-        width: 100%;
-        display: flex;
-        flex-flow: column;
-        align-items: center;
-
-        & .no-img-found {
-
-        }
-        
-        & img.click {
-            width: 100%;
-            margin-bottom: 4px;
-            border: 2px var(--hr-color) solid;
-            border-radius: 5px;
-        
-            &:hover {
-                opacity: .8;
-                border: 2px red solid;
-            }
-    
-            &:active {
-                opacity: 1;
-                border: 2px green solid;
-            }
-    
-        }
-
-        & > hr {
-            width: 100%;
-        }
-    }
-
-}
-*/
-
 .ImageSearchModal {
 
     .modal:has(&) {
@@ -167,15 +94,69 @@ If your plugin does not need CSS, delete this file.
 
 }
 
-.DefaultScannerModal {
-    & .section-header {
-        margin-bottom: 5px;
-    }
+.ScannerModal {
 
-    & ul {
-        margin-top: 5px;
-    }
+    & details {
+        background-color: var(--main-color);
+        margin-bottom: 2px;
+        
+        &>summary {
+            width: 100%;
 
+            background-color: var(--side-color);
+
+            display: flex;
+            align-items: center;
+
+            &>svg {
+                margin: 8px;
+            }
+
+            &>span.title {
+                flex: 1;
+                font-size: 16px;
+                padding-left: 0px;
+            }
+
+        }
+
+        &>.item-container {
+            display: flex;
+            justify-content: left;
+            align-items: center;
+            height: 34px;
+            padding-top: 3px;
+            padding-bottom: 3px;
+
+            margin-left: 16px;
+            border-left: solid #fff 1px;
+
+            &:nth-child(2) {
+                border-image: linear-gradient(to top, #fff 0%, #fff 80%, #00000000 95%) 1;
+            }
+
+            &:last-child {
+                border-image: linear-gradient(to bottom, #fff 0%, #fff 80%, #00000000 90%) 1;
+            }
+
+            &>.name {
+                flex: 1;
+                padding-left: 16px;
+                text-decoration: none;
+            }
+
+        }
+
+        & span.clickable-icon {
+            margin-right: 4px;
+            aspect-ratio: 1/1;
+            font-family: monospace;
+            &.btn-fix {
+                cursor: pointer;
+            }
+        }
+
+    }
 }
 
 .GitPushModal {
