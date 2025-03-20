@@ -149,9 +149,10 @@ If your plugin does not need CSS, delete this file.
 
         & span.clickable-icon {
             margin-right: 4px;
-            aspect-ratio: 1/1;
             font-family: monospace;
+            
             &.btn-fix {
+                aspect-ratio: 1/1;
                 cursor: pointer;
             }
         }

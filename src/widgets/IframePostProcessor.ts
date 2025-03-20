@@ -22,7 +22,7 @@ export function registerIframeMarkdownPostProcessor(this: Plugin) {
             }
 
             // Youtube
-            const youtubeMatch = text.match(/(?:https|http):\/\/youtu.be\/(\w+)(?:$|\?)|(?:https|http):\/\/www.youtube.com\/embed\/(\w+)(?:$|\?)|(?:https|http):\/\/www.youtube.com\/watch\?v=(\w+)(?:$|&)/);
+            const youtubeMatch = text.match(/(?:https|http):\/\/youtu.be\/(\w+)(?:$|\?)|(?:https|http):\/\/www.youtube.com\/embed\/(\w+)(?:$|\?)|(?:https|http):\/\/www.youtube.com\/watch\?v=(\S+)(?:$|&)/);
             if (youtubeMatch) {
                 const [, thisId] = youtubeMatch.filter(id => id);
                 const iframe = document.createElement("iframe");
