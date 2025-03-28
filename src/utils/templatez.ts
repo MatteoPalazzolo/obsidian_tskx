@@ -65,7 +65,7 @@ export async function templetizeFile(this: Plugin, file: TAbstractFile) {
     if (!(file instanceof TFile) || file.extension !== "md") {
         return;
     }
-    const templateFile = getTemplateOfFile.call(this, file);
+    const templateFile = await getTemplateOfFile.call(this, file);
     if (templateFile) {
         const templateContent = await this.app.vault.read(templateFile);
         this.app.vault.modify(file, templateContent);
