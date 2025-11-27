@@ -1,5 +1,5 @@
 import { Plugin } from "obsidian";
-import { requestGetJson } from "src/utils/requestGet";
+import { requestGetJson } from "src/utils/RequestGet";
 
 // TODO: al momento funziona bene, ma il layout non è molto flessibile e non è estendibile, modificare all'occorrenza
 export function registerIframeMarkdownPostProcessor(this: Plugin) {
@@ -16,7 +16,6 @@ export function registerIframeMarkdownPostProcessor(this: Plugin) {
                 iframe.classList.add('spotify-iframe');
                 iframe.classList.add(thisType);
                 iframe.src = `https://open.spotify.com/embed/${thisType}/${thisId}?theme=1`;
-                iframe.loading = "lazy";
                 p.replaceWith(iframe);
                 return;
             }
@@ -28,7 +27,6 @@ export function registerIframeMarkdownPostProcessor(this: Plugin) {
                 const iframe = document.createElement("iframe");
                 iframe.classList.add('youtube-iframe');
                 iframe.src = `https://www.youtube.com/embed/${thisId}`;
-                iframe.loading = "lazy";
                 p.replaceWith(iframe);
                 return;
             }
@@ -45,7 +43,6 @@ export function registerIframeMarkdownPostProcessor(this: Plugin) {
                 const iframe = document.createElement("iframe");
                 iframe.classList.add('steam-iframe');
                 iframe.src = `https://store.steampowered.com/widget/${thisId}?t=`;
-                iframe.loading = "lazy";
                 p.replaceWith(iframe);
                 return;
             }
@@ -57,7 +54,6 @@ export function registerIframeMarkdownPostProcessor(this: Plugin) {
                 const iframe = document.createElement("iframe");
                 iframe.classList.add('itchio-iframe');
                 iframe.src = `https://itch.io/embed/${thisId}?dark=true`;
-                iframe.loading = "lazy";
                 p.replaceWith(iframe);
                 return;
             }
@@ -76,7 +72,6 @@ export function registerIframeMarkdownPostProcessor(this: Plugin) {
                 const iframe = document.createElement("iframe");
                 iframe.classList.add('itchio-iframe');
                 iframe.src = `https://itch.io/embed/${thisId}?dark=true`;
-                iframe.loading = "lazy";
                 p.replaceWith(iframe);
                 return;
             }
@@ -107,7 +102,6 @@ async function createSteamAndItchioWidget(text: string, target: HTMLElement): Pr
             const iframe = container.createEl("iframe");
             iframe.classList.add('steam-iframe');
             iframe.src = `https://store.steampowered.com/widget/${thisId}?t=`;
-            iframe.loading = "lazy";
             out.push("steam");
             continue;
         }
@@ -119,7 +113,6 @@ async function createSteamAndItchioWidget(text: string, target: HTMLElement): Pr
             const iframe = container.createEl("iframe");
             iframe.classList.add('itchio-iframe');
             iframe.src = `https://itch.io/embed/${thisId}?dark=true`;
-            iframe.loading = "lazy";
             out.push("itchio");
             continue;
         }
@@ -139,7 +132,6 @@ async function createSteamAndItchioWidget(text: string, target: HTMLElement): Pr
             const iframe = container.createEl("iframe");
             iframe.classList.add('itchio-iframe');
             iframe.src = `https://itch.io/embed/${thisId}?dark=true`;
-            iframe.loading = "lazy";
             out.push("itchio");
             continue;
         }
