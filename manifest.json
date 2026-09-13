@@ -1,10 +1,10 @@
 {
-	"id": "my-dude",
-	"name": "My Dude",
+	"id": "obsidian-tools",
+	"name": "Obsidian Tools",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Some utilities to speed up boring tasks.",
-	"author": "Palazz",
+	"description": "",
+	"author": "palazz",
 	"authorUrl": "https://obsidian.md",
 	"fundingUrl": "https://obsidian.md/pricing",
 	"isDesktopOnly": false

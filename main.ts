@@ -24,6 +24,9 @@ export default class extends Plugin {
 
         await this.loadSecretSettings();
 
+		// init modules
+		// ...
+
         this.addRibbonIcon('link', 'Import From Link', (evt: MouseEvent) => new ImportFromLinkModal(this.app, this.secretSettings).open());
         this.addRibbonIcon('image-plus', 'Image Search', (evt: MouseEvent) => new ImageSearchModal(this.app).open());
         this.addRibbonIcon('scan-eye', 'Scanner', (evt: MouseEvent) => new ScannerModal(this.app).open());
@@ -34,9 +37,12 @@ export default class extends Plugin {
 			console.log(await isTemplateCoherentToParentTemplate.call(this, fileT));
 		});
 
+		this.app.workspace.onLayoutReady(() => {
+
+		});
         registerIframeMarkdownPostProcessor.call(this);
 		registerCodeBlockProcessor.call(this);
-        registerTemplatezListener.call(this);        
+        registerTemplatezListener.call(this);
 
     }
 

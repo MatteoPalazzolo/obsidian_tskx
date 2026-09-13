@@ -1,5 +1,5 @@
 import { Plugin } from "obsidian";
-import { requestGetJson } from "src/utils/RequestGet";
+import { obsidianFetchGetJson } from "src/utils/obsidianFetch";
 
 // TODO: al momento funziona bene, ma il layout non è molto flessibile e non è estendibile, modificare all'occorrenza
 export function registerIframeMarkdownPostProcessor(this: Plugin) {
@@ -63,7 +63,7 @@ export function registerIframeMarkdownPostProcessor(this: Plugin) {
             if (itchioMatch2) {
                 const [, devName, gameName] = itchioMatch2;
 
-                const ans: { content: string } = await requestGetJson(`https://${devName}.itch.io/${gameName}/embed`);
+                const ans: { content: string } = await obsidianFetchGetJson(`https://${devName}.itch.io/${gameName}/embed`);
                 const idMatch = ans.content.match(/embed\\\/(\d+?)&quot/);
                 if (!idMatch)
                     return;
@@ -122,7 +122,7 @@ async function createSteamAndItchioWidget(text: string, target: HTMLElement): Pr
         if (itchioMatch2) {
             const [, devName, gameName] = itchioMatch2;
 
-            const ans: { content: string } = await requestGetJson(`https://${devName}.itch.io/${gameName}/embed`);
+            const ans: { content: string } = await obsidianFetchGetJson(`https://${devName}.itch.io/${gameName}/embed`);
             const idMatch = ans.content.match(/embed\\\/(\d+?)&quot/);
             
             if (!idMatch)
