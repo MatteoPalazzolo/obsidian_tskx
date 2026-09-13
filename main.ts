@@ -7,12 +7,14 @@ import { registerCodeBlockProcessor }           from 'src/Widgets/GalleryCodeBlo
 import { registerIframeMarkdownPostProcessor }  from 'src/Widgets/IframePostProcessor';
 import { SecretSettings } from 'src/types';
 import { SECRET_SETTINGS_FILENAME } from 'src/conts';
+import * as PatchMetadataPropertiesDOM from 'src/hacks/patchMetadataPropertiesDOM';
 import {
-	getFilePropsAsMap,
+	init as initTemplateAPIModule,
+	// getFilePropsAsMap,
 	isTemplateCoherentToParentTemplate,
 	registerTemplatezListener,
 	templetizeFile
-} from 'src/utils/templatez';
+} from 'src/utils/templateAPI';
 
 
 export default class extends Plugin {
@@ -25,7 +27,7 @@ export default class extends Plugin {
         await this.loadSecretSettings();
 
 		// init modules
-		// ...
+		initTemplateAPIModule(this);
 
         this.addRibbonIcon('link', 'Import From Link', (evt: MouseEvent) => new ImportFromLinkModal(this.app, this.secretSettings).open());
         this.addRibbonIcon('image-plus', 'Image Search', (evt: MouseEvent) => new ImageSearchModal(this.app).open());
@@ -37,17 +39,32 @@ export default class extends Plugin {
 			console.log(await isTemplateCoherentToParentTemplate.call(this, fileT));
 		});
 
-		this.app.workspace.onLayoutReady(() => {
-
-		});
-        registerIframeMarkdownPostProcessor.call(this);
+		registerIframeMarkdownPostProcessor.call(this);
 		registerCodeBlockProcessor.call(this);
-        registerTemplatezListener.call(this);
+
+		this.app.workspace.onLayoutReady(() => {
+			registerTemplatezListener();
+
+			PatchMetadataPropertiesDOM.init();
+
+			// Ogni volta che cambia il layout (es. apri una nota, cambi scheda o vista)
+			this.registerEvent( this.app.workspace.on('layout-change', () => {
+					PatchMetadataPropertiesDOM.clear();
+					try {
+						PatchMetadataPropertiesDOM.bind();
+					} catch (e) {}
+				})
+			);
+			PatchMetadataPropertiesDOM.bind();
+		});
+
+		// BIND PatchMetadataPropertiesDOM
+
 
     }
 
     onunload() {
-
+		PatchMetadataPropertiesDOM.clear();
     }
 
     private async loadSecretSettings() {
