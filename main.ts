@@ -8,13 +8,13 @@ import { registerIframeMarkdownPostProcessor }  from 'src/Widgets/IframePostProc
 import { SecretSettings } from 'src/types';
 import { SECRET_SETTINGS_FILENAME } from 'src/conts';
 import * as PatchMetadataPropertiesDOM from 'src/hacks/patchMetadataPropertiesDOM';
+import * as StatusMetadataPropertiesDOM from 'src/hacks/statusMetadataPropertiesDOM';
 import {
 	init as initTemplateAPIModule,
-	// getFilePropsAsMap,
 	isTemplateCoherentToParentTemplate,
 	registerTemplatezListener,
-	applyTemplateToNewFile
 } from 'src/utils/templateAPI';
+import {refreshIcon} from "src/hacks/statusMetadataPropertiesDOM";
 
 
 export default class extends Plugin {
@@ -28,6 +28,8 @@ export default class extends Plugin {
 
 		// init modules
 		initTemplateAPIModule(this);
+		PatchMetadataPropertiesDOM.init(this);
+		StatusMetadataPropertiesDOM.init(this);
 
         this.addRibbonIcon('link', 'Import From Link', (evt: MouseEvent) => new ImportFromLinkModal(this.app, this.secretSettings).open());
         this.addRibbonIcon('image-plus', 'Image Search', (evt: MouseEvent) => new ImageSearchModal(this.app).open());
@@ -44,26 +46,15 @@ export default class extends Plugin {
 
 		this.app.workspace.onLayoutReady(() => {
 			registerTemplatezListener();
-
-			PatchMetadataPropertiesDOM.init();
-
-			// Ogni volta che cambia il layout (es. apri una nota, cambi scheda o vista)
-			this.registerEvent( this.app.workspace.on('active-leaf-change', () => {
-					PatchMetadataPropertiesDOM.clear();
-					try {
-						PatchMetadataPropertiesDOM.bind();
-					} catch (e) {}
-				})
-			);
-			PatchMetadataPropertiesDOM.bind();
+			PatchMetadataPropertiesDOM.refreshButton();
+			StatusMetadataPropertiesDOM.refreshIcon();
 		});
-
-		// BIND PatchMetadataPropertiesDOM
 
     }
 
     onunload() {
 		PatchMetadataPropertiesDOM.clear();
+		StatusMetadataPropertiesDOM.clear();
     }
 
     private async loadSecretSettings() {

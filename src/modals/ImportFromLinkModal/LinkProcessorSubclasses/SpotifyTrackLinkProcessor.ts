@@ -3,7 +3,7 @@ import { LinkProcessorSettings, SecretSettings } from "src/types";
 import { LinkProcessor } from "./LinkProcessor";
 import { Track, SpotifyApi } from "@spotify/web-api-ts-sdk";
 import dayjs from "dayjs";
-import { escapeFilePropertyStrings as scp } from "src/utils/templatez";
+import { escapeFilePropertyStrings as scp } from "src/utils/templateAPI";
 
 interface NewSpotifyTrackData {
     name: string,

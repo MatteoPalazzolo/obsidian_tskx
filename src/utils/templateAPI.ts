@@ -47,15 +47,12 @@ export function getTemplateOfFile(file: TFile | undefined): TFile | undefined {
 	}
 }
 
-export function getCurrentFile() {
-	let activeFile = getCtx().app.workspace.getActiveFile() ?? undefined;
+export function getActiveMarkdownView() {
+	return getCtx().app.workspace.getActiveViewOfType(MarkdownView);
+}
 
-	if (!activeFile) {
-		const markdownView = getCtx().app.workspace.getActiveViewOfType(MarkdownView);
-		activeFile = markdownView?.file ?? undefined;
-	}
-
-	return activeFile;
+export function getActiveMarkdownFile() {
+	return getActiveMarkdownView()?.file ?? undefined;
 }
 
 export function getFilePropsUnsorted(file: TFile | undefined): Record<string, any> | undefined {
@@ -123,37 +120,6 @@ export async function applyTemplateToNewFile(file: TFile) {
 
 }
 
-export function mergeSecondOnFirstMap(
-	templateMap: Map<string, any>,
-	fileMap: Map<string, any>,
-	tail = true
-): Map<string, any> {
-	const merged = new Map<string, any>();
-
-	// 1. Inserisce prima le proprietà del TEMPLATE (mantenendo il loro ordine)
-	for (const [key, templateValue] of templateMap.entries()) {
-		if (fileMap.has(key)) {
-			// Se il file ha un valore per questa chiave, usa quello del file
-			merged.set(key, fileMap.get(key));
-		} else {
-			// Altrimenti usa il valore di default del template
-			merged.set(key, templateValue);
-		}
-	}
-
-	if (!tail)
-		return merged;
-
-	// 2. Accoda in fondo le proprietà del FILE che NON esistono nel template
-	for (const [key, fileValue] of fileMap.entries()) {
-		if (!merged.has(key)) {
-			merged.set(key, fileValue);
-		}
-	}
-
-	return merged;
-}
-
 export function isTemplateCoherentToParentTemplate(
 	templateFile: TFile
 ): { isValid: boolean, neededProps: Set<string>, extraProps: Set<string> } {
@@ -181,4 +147,57 @@ export function isTemplateCoherentToParentTemplate(
 		neededProps: parentPropsSet.difference(intersection),
 		extraProps: templatePropsSet.difference(intersection),
 	};
+}
+
+
+// ESISTE SOLO PER COMPATIBILITà COL SUPPORTO DI SPOTIFY
+/**
+ * Conforma una stringa con la convenzione delle proprietà di Obsidian per evitare errori.
+ *
+ * @param {string} s - Stringa di cui fare l'escape.
+ * @returns {string} Escaped string.
+ */
+export function escapeFilePropertyStrings(s: string): string {
+	if (s.includes(":")) {
+		if (!s.includes('"')) {
+			return `"${s}"`;
+		}
+		else if (!s.includes("'")) {
+			return `'${s}'`;
+		}
+		else {
+			return `"${s.replace(/"/g, '\\\"')}"`;
+		}
+	}
+	if (s.startsWith("'")) {
+		if (!s.includes('"')) {
+			return `"${s}"`;
+		}
+		else {
+			return `"${s.replace(/"/g, '\\\"')}"`;
+		}
+	}
+	else if (s.startsWith('"')) {
+		if (!s.includes("'")) {
+			return `'${s}'`;
+		}
+		else {
+			return `"${s.replace(/"/g, '\\\"')}"`;
+		}
+	}
+	else if (s.startsWith("`")) {
+		if (!s.includes('"')) {
+			return `"${s}"`;
+		}
+		else if (!s.includes("'")) {
+			return `'${s}'`;
+		}
+		else {
+			return `"${s.replace(/"/g, '\\\"')}"`;
+		}
+	}
+	else {
+		return s;
+	}
+
 }
