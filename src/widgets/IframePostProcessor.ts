@@ -63,8 +63,10 @@ export function registerIframeMarkdownPostProcessor(this: Plugin) {
             if (itchioMatch2) {
                 const [, devName, gameName] = itchioMatch2;
 
-                const ans: { content: string } = await obsidianFetchGetJson(`https://${devName}.itch.io/${gameName}/embed`);
-                const idMatch = ans.content.match(/embed\\\/(\d+?)&quot/);
+                const ans: { content: string } | null = await obsidianFetchGetJson(`https://${devName}.itch.io/${gameName}/embed`);
+				if (!ans)
+					return;
+				const idMatch = ans.content.match(/embed\\\/(\d+?)&quot/);
                 if (!idMatch)
                     return;
 
@@ -122,11 +124,13 @@ async function createSteamAndItchioWidget(text: string, target: HTMLElement): Pr
         if (itchioMatch2) {
             const [, devName, gameName] = itchioMatch2;
 
-            const ans: { content: string } = await obsidianFetchGetJson(`https://${devName}.itch.io/${gameName}/embed`);
+            const ans: { content: string } | null = await obsidianFetchGetJson(`https://${devName}.itch.io/${gameName}/embed`);
+			if (!ans)
+				continue;
+
             const idMatch = ans.content.match(/embed\\\/(\d+?)&quot/);
-            
             if (!idMatch)
-                continue
+                continue;
 
             const [, thisId] = idMatch;
             const iframe = container.createEl("iframe");

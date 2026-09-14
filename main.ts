@@ -1,10 +1,10 @@
 import {Plugin, Notice, TFile} from 'obsidian';
-import { ImageSearchModal }                     from 'src/Modals/ImageSearchModal/ImageSearchModal';
-import { GitPushModal }                         from 'src/Modals/GitPushModal/GitPushModal';
-import { ScannerModal }                         from 'src/Modals/ScannerModal/ScannerModal';
-import { ImportFromLinkModal }                  from 'src/Modals/ImportFromLinkModal/ImportFromLinkModal';
-import { registerCodeBlockProcessor }           from 'src/Widgets/GalleryCodeBlock';
-import { registerIframeMarkdownPostProcessor }  from 'src/Widgets/IframePostProcessor';
+import { ImageSearchModal }                     from 'src/modals/ImageSearchModal/ImageSearchModal';
+import { GitPushModal }                         from 'src/modals/GitPushModal/GitPushModal';
+import { ScannerModal }                         from 'src/modals/ScannerModal/ScannerModal';
+import { ImportFromLinkModal }                  from 'src/modals/ImportFromLinkModal/ImportFromLinkModal';
+import { registerCodeBlockProcessor }           from 'src/widgets/GalleryCodeBlock';
+import { registerIframeMarkdownPostProcessor }  from 'src/widgets/IframePostProcessor';
 import { SecretSettings } from 'src/types';
 import { SECRET_SETTINGS_FILENAME } from 'src/conts';
 import * as PatchMetadataPropertiesDOM from 'src/hacks/patchMetadataPropertiesDOM';

@@ -1,5 +1,5 @@
 import { Plugin, setIcon } from "obsidian";
-import { ImageSearchModal } from "src/Modals/ImageSearchModal/ImageSearchModal";
+import { ImageSearchModal } from "src/modals/ImageSearchModal/ImageSearchModal";
 
 export function registerCodeBlockProcessor(this: Plugin) {
     this.registerMarkdownCodeBlockProcessor("gallery", async (source, el, ctx) => {
