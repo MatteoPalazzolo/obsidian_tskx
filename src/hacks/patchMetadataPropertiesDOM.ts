@@ -1,13 +1,19 @@
 import {Plugin, setIcon} from "obsidian";
 import {createElInline} from "../utils/dom";
-import {getTemplateOfCurrentFile} from "../utils/templateAPI";
+import {
+	getCurrentFile,
+	getFileProps,
+	getTemplateOfFile,
+	mergeSecondOnFirstMap,
+	setFileProps
+} from "../utils/templateAPI";
 
 let controller = new AbortController();
 let observer: MutationObserver | undefined;
 let reconformButtonDiv: HTMLDivElement | undefined;
 
 export function init(): void {
-	const templatePath = getTemplateOfCurrentFile()?.path ?? "";
+	const templatePath = getTemplateOfFile(getCurrentFile())?.path ?? "";
 	reconformButtonDiv = createElInline('div', 'metadata-add-button text-icon-button', {'aria-label': templatePath}, [
 		createElInline('span', 'text-button-icon', undefined, undefined, el => setIcon(el, 'list-restart')),
 		createElInline('span', 'text-button-label', undefined, 'Reconform from Template')
@@ -16,7 +22,7 @@ export function init(): void {
 
 export function bind() {
 	if (!reconformButtonDiv) {
-		throw new Error("reconformButtonDiv non inizializzato! Chiama init(this) nel metodo onload().");
+		throw new Error("reconformButtonDiv non inizializzato! Chiama init() nel metodo onload().");
 	}
 
 	const container = document.querySelector('.metadata-container');
@@ -24,8 +30,14 @@ export function bind() {
 		throw new Error("'.metadata-container' non trovato!");
 	}
 
-	reconformButtonDiv.addEventListener('click', () => {
-		console.log("AIUTO!!!")
+	reconformButtonDiv.addEventListener('click', async () => {
+		const currentProps = await getFileProps(getCurrentFile());
+		const templateProps = await getFileProps(getTemplateOfFile(getCurrentFile()));
+
+		const merged = mergeSecondOnFirstMap(templateProps, currentProps);
+
+		await setFileProps(getCurrentFile(), merged);
+
 	}, { signal: controller.signal });
 
 	const ensureButtonInserted = () => {

@@ -13,7 +13,7 @@ import {
 	// getFilePropsAsMap,
 	isTemplateCoherentToParentTemplate,
 	registerTemplatezListener,
-	templetizeFile
+	applyTemplateToNewFile
 } from 'src/utils/templateAPI';
 
 
@@ -48,7 +48,7 @@ export default class extends Plugin {
 			PatchMetadataPropertiesDOM.init();
 
 			// Ogni volta che cambia il layout (es. apri una nota, cambi scheda o vista)
-			this.registerEvent( this.app.workspace.on('layout-change', () => {
+			this.registerEvent( this.app.workspace.on('active-leaf-change', () => {
 					PatchMetadataPropertiesDOM.clear();
 					try {
 						PatchMetadataPropertiesDOM.bind();
@@ -59,7 +59,6 @@ export default class extends Plugin {
 		});
 
 		// BIND PatchMetadataPropertiesDOM
-
 
     }
 
