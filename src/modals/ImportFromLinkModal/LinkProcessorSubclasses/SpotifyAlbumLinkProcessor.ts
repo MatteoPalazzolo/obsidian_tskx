@@ -2,8 +2,8 @@ import { Modal, Notice } from "obsidian";
 import { LinkProcessorSettings, SecretSettings } from "src/types";
 import { LinkProcessor } from "./LinkProcessor";
 import { Album, SpotifyApi } from "@spotify/web-api-ts-sdk";
-import dayjs from "dayjs";
-import { escapeFilePropertyStrings as scp } from "src/utils/templateAPI";
+import { escapeFilePropertyStrings as scp } from "src/utils/escapeFilePropertyStrings";
+import { formatCurrentDate } from "src/utils/date";
 
 interface NewSpotifyAlbumData {
     name: string,
@@ -64,7 +64,7 @@ export class SpotifyAlbumLinkProcessor extends LinkProcessor<NewSpotifyAlbumData
     
     processTemplate(templateContent: string, data: NewSpotifyAlbumData): string {
         return templateContent
-            .replace(/^date:[^\S\n]*$/m, "date: " + dayjs().format("YYYY-MM-DD"))
+            .replace(/^date:[^\S\n]*$/m, "date: " + formatCurrentDate())
             .replace(/^name:[^\S\n]*$/m, "name: " + scp(data.name))
             .replace(/^author:[^\S\n]*\[\][^\S\n]*$/m, "author:\n  - " + data.artists.map(scp).join("\n  - "))
             .replace("https://open.spotify.com/album/", `https://open.spotify.com/album/${this.uid}`);

@@ -1,52 +1,49 @@
-# TsKx (TypeScript picKaXe)
+# Obsidian Tools (TsKx)
 
 ## Intro
-Ho iniziato a sviluppare questa estensione di obsidian per facilitare l'archiviazione di media nel mio database.
+Estensione Obsidian per la gestione del mio archivio media personale: musica, film, videogiochi, anime e libri.
 
-Il progetto è stato pensato per essere ben organizzato, facilmente mantenibile e estendibile a distanza di molto tempo. Per questi motivi ho cercato di prestare massima attenzione alla struttura del codice.
+Il plugin si occupa esclusivamente di:
+- **gallery**: code block `gallery` con carousel e modale di ricerca immagini;
+- **crawler**: ricerca di banner e copertine da Steam, itch.io e TMDb;
+- **import automatici** specifici della forma del mio vault (al momento Spotify: tracce, album e artisti);
+- **embed**: conversione dei link ai media in iframe nelle note.
 
-Si tratta di una serie di tool comodi per la gestione del mio archivio personale, che presenta musica, film, videogiochi, anime e libri.
+Le feature di template e lo scanner sono state separate in un plugin dedicato e non fanno più parte di questa repository.
 
-### Image Scraper
-Si tratta di una finestra che ho programmato per facilitare la scelta delle immagini da aggiungere alla carousel di ogni opera.
+### Gallery e Image Scraper
 
-Quando viene premuto il tasto cerca, dopo aver inserito il titolo e aver selezionato gli scraper da attivare per questa ricerca, il programma si occuperà di cercare immagini dai siti selezionati le elencherà in una griglia.
+Il code block `gallery` raccoglie una lista di URL (uno per riga) e, in modalità lettura, li mostra come carousel con frecce e menu contestuale.
 
-Ogni immagine e affiancata da una checkbox per facilitare la selezione di molteplici elementi.
+![gallery](./screenshots/immage_scraper_3.gif)
 
-Le immagini visualizzate nella prima griglia di immagini sono quelle già presenti nella carousel e possono essere comodamente rimosse deselezionando la checkbox corrispondente.
+La modale **Image Search** permette di cercare immagini da una o più fonti e di selezionarle tramite checkbox. Le immagini già presenti nella gallery sono mostrate per prime e possono essere deselezionate per rimuoverle.
 
-![immage_scraper](./screenshots/immage_scraper_1.png)
+![image_scraper](./screenshots/immage_scraper_1.png)
 
-I link alle varie immagini vengono collezionati e stampati come testo (uno per riga) in una gallery, un elemento custom che ho programmato per assenza di alternative migliori.
+Il risultato viene scritto nel code block `gallery` della nota attiva, oppure copiato negli appunti se non c'è una gallery di destinazione.
 
-![immage_scraper](./screenshots/immage_scraper_2.png)
-
-Questo elemento, quando si passa dalla modalità di modifica a quella di visualizzazione si trasforma in una carousel che ho scritto da zero in typescript vanilla.
-
-![immage_scraper](./screenshots/immage_scraper_3.gif)
+![image_scraper](./screenshots/immage_scraper_2.png)
 
 ### Import From Link
 
-Da quando ho iniziato a includere la musica in questa raccolta, mi sono reso conto che ci voleva più tempo a aggiungere manualmente una canzone alla collezione piuttosto che ascoltarla... e dopo un po' si è dimostrato non esattamente comodo.
-
-Ho quindi optato per sfruttare l'API di Spotify. Ora basta incollare il link della canzone / artista / album e in automatico verranno recuperate tutte le informazioni e organizzate in documenti nelle apposite cartelle.
-
-Eventualmente, con poca difficoltà, è possibile estendere l'import automatico per media che vanno oltre alla musica, ma al momento non ne ho necessità.
+Gli import automatici sfruttano l'API di Spotify. Incollando il link di una traccia, di un album o di un artista vengono recuperate le informazioni e viene creato un nuovo documento nella cartella corretta del vault, partendo dal relativo `!Template.md`.
 
 ![import_from_link](./screenshots/import_from_link.png)
 
-### Issues Scanner
+I percorsi di destinazione e i template sono volutamente hardcoded: sono specifici della struttura del mio vault.
 
-Questa è l'ultima feature a cui ho lavorato prima di mettere in pausa il progetto, si tratta di uno scanner che usando regex e criteri vari, segnala tutti i file in cui ci sono cose che non vanno o da modificare.
+### Embed
 
-Al momento segnala solo i file che contengono i tag #TODO o #FILL, ma avevo in programma di far notificare i file che non rispettano i template da cui sono stati generati, con annesso pulsante pre un fix automatico.
-
-Un problema del me del futuro quando tornerà a lavorare al progetto :)
-
-![issues_scanner](./screenshots/issues_scanner.png)
+Il post processor converte automaticamente i link a Spotify, YouTube, Steam e itch.io in iframe nelle note, mantenendo il layout coerente con il tema di Obsidian.
 
 ## Cmd
 ```cli
 npm run dev
+```
+
+Build di produzione e typecheck:
+
+```cli
+npm run build
 ```
